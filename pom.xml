@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-base</artifactId>
+        <version>2.9.5</version>
+    </parent>
+    <groupId>org.openapitools</groupId>
+    <artifactId>jackson-databind-nullable</artifactId>
+    <packaging>jar</packaging>
+    <name>JsonNullable Jackson module</name>
+    <description>JsonNullable wrapper class and Jackson module to support fields with meaningful null values.</description>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <url>https://github.com/OpenAPITools/jackson-databind-nullable</url>
+    <scm>
+        <connection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</developerConnection>
+        <url>https://github.com/OpenAPITools/jackson-databind-nullable</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <!-- Generate PackageVersion.java into this directory. -->
+        <packageVersion.dir>org/openapitools/jackson/nullable</packageVersion.dir>
+        <packageVersion.package>${project.groupId}.jackson.nullable</packageVersion.package>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <executions>
+                    <execution>
+                        <id>process-packageVersion</id>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
