@@ -248,7 +248,7 @@ public class JsonNullableBasicTest extends ModuleTestBase {
 
     public void testDeserNull() throws Exception {
         JsonNullable<?> value = MAPPER.readValue("\"\"", new TypeReference<JsonNullable<Integer>>() {});
-        assertNull(value.get());
+        assertFalse(value.isPresent());
     }
 
     public void testPolymorphic() throws Exception

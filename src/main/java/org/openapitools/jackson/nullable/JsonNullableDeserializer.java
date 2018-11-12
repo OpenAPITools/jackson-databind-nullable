@@ -1,6 +1,8 @@
 package org.openapitools.jackson.nullable;
 
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -8,6 +10,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.deser.std.ReferenceTypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+
+import java.io.IOException;
 
 public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNullable<Object>> {
 
@@ -31,10 +35,23 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
      */
 
     @Override
+    public JsonNullable<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        JsonToken t = p.getCurrentToken();
+        if (t == JsonToken.VALUE_STRING && !_fullType.isTypeOrSubTypeOf(String.class)) {
+            String str = p.getText().trim();
+            if (str.isEmpty()) {
+                return JsonNullable.undefined();
+            }
+        }
+        return super.deserialize(p, ctxt);
+    }
+
+    @Override
     public JsonNullableDeserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
         return new JsonNullableDeserializer(_fullType, _valueInstantiator,
                 typeDeser, valueDeser);
     }
+
     @Override
     public JsonNullable<Object> getNullValue(DeserializationContext ctxt) {
         return JsonNullable.of(null);
