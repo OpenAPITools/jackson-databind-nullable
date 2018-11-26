@@ -73,14 +73,6 @@ public final class JsonNullableSimpleTest {
         testReadPetName(JsonNullable.of("Rex"), "{\"name\":\"Rex\"}");
         testReadPetName(JsonNullable.<String>of(null), "{\"name\":null}");
         testReadPetName(JsonNullable.<String>undefined(), "{}");
-
-
-
-        /*Pet pet = new Pet();
-        mapper.updateValue(pet, new Pet().name(JsonNullable.of("foo")));
-        mapper.readerForUpdating(pet).readValue("{\"name\": null}");
-        assertTrue(pet.getName().isPresent());
-        assertNull(pet.getName().get());*/
     }
 
     @Test
