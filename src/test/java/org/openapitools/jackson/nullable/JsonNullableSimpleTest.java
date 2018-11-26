@@ -92,17 +92,13 @@ public final class JsonNullableSimpleTest {
 
     private void testReadPetName(JsonNullable<String> expected, String json) throws IOException {
         Pet pet = mapper.readValue(json, Pet.class);
-        JsonNullable<String> name = pet.getName();
+        JsonNullable<String> name = pet.name;
         assertEquals(expected, name);
     }
 
     private static class Pet {
 
-        private JsonNullable<String> name = JsonNullable.undefined();
-
-        public JsonNullable<String> getName() {
-            return name;
-        }
+        public JsonNullable<String> name = JsonNullable.undefined();
 
         public Pet name(JsonNullable<String> name) {
             this.name = name;

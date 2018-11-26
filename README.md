@@ -27,6 +27,11 @@ If we have the following class
 ```java
 public static class Pet {
     public JsonNullable<String> name = JsonNullable.undefined();
+    
+    public Pet name(JsonNullable<String> name) {
+        this.name = name;
+        return this;
+    }
 }
 
 ```
