@@ -20,3 +20,5 @@ target
 *.ipr
 *.iws
 .idea/
+
+*.gpg
