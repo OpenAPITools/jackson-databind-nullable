@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public final class JsonNullableSimpleTest {
 
@@ -69,22 +69,44 @@ public final class JsonNullableSimpleTest {
     }
 
     @Test
-    public void deserialize() throws IOException {
+    public void deserializeStringMembers() throws IOException {
         testReadPetName(JsonNullable.of("Rex"), "{\"name\":\"Rex\"}");
         testReadPetName(JsonNullable.<String>of(null), "{\"name\":null}");
+        testReadPetName(JsonNullable.<String>of(""), "{\"name\":\"\"}");
+        testReadPetName(JsonNullable.<String>of("   "), "{\"name\":\"   \"}");
         testReadPetName(JsonNullable.<String>undefined(), "{}");
     }
 
     @Test
-    public void deserializeNonBeanProperty() throws IOException {
+    public void deserializeNonStringMembers() throws IOException {
+        testReadPetAge(JsonNullable.of(Integer.valueOf(15)), "{\"age\":\"15\"}");
+        testReadPetAge(JsonNullable.<Integer>of(null), "{\"age\":null}");
+        testReadPetAge(JsonNullable.<Integer>undefined(), "{\"age\":\"\"}");
+        testReadPetAge(JsonNullable.<Integer>undefined(), "{\"age\":\"   \"}");
+        testReadPetAge(JsonNullable.<Integer>undefined(), "{}");
+    }
+
+    @Test
+    public void deserializeStringNonBeanMembers() throws IOException {
+        assertEquals(JsonNullable.of(null), mapper.readValue("null", new TypeReference<JsonNullable<String>>() {}));
+        assertEquals(JsonNullable.of("42"), mapper.readValue("\"42\"", new TypeReference<JsonNullable<String>>() {}));
+        assertEquals(JsonNullable.of(""), mapper.readValue("\"\"", new TypeReference<JsonNullable<String>>() {}));
+        assertEquals(JsonNullable.of("   "), mapper.readValue("\"   \"", new TypeReference<JsonNullable<String>>() {}));
+    }
+
+    @Test
+    public void deserializeNonStringNonBeanMembers() throws IOException {
         assertEquals(JsonNullable.of(null), mapper.readValue("\"null\"", new TypeReference<JsonNullable<Integer>>() {}));
         assertEquals(JsonNullable.of(42), mapper.readValue("\"42\"", new TypeReference<JsonNullable<Integer>>() {}));
         assertEquals(JsonNullable.undefined(), mapper.readValue("\"\"", new TypeReference<JsonNullable<Integer>>() {}));
+        assertEquals(JsonNullable.undefined(), mapper.readValue("\"  \"", new TypeReference<JsonNullable<Integer>>() {}));
     }
 
     @Test
     public void deserializeCollection() throws IOException {
-        List<JsonNullable<String>> values = mapper.readValue("[\"foo\", null]", new TypeReference<List<JsonNullable<String>>>() {});
+        List<JsonNullable<String>> values = mapper.readValue("[\"foo\", null]",
+                new TypeReference<List<JsonNullable<String>>>() {
+                });
         assertEquals(2, values.size());
         assertEquals(JsonNullable.of("foo"), values.get(0));
         assertEquals(JsonNullable.of(null), values.get(1));
@@ -96,12 +118,24 @@ public final class JsonNullableSimpleTest {
         assertEquals(expected, name);
     }
 
+    private void testReadPetAge(JsonNullable<Integer> expected, String json) throws IOException {
+        Pet pet = mapper.readValue(json, Pet.class);
+        JsonNullable<Integer> age = pet.age;
+        assertEquals(expected, age);
+    }
+
     private static class Pet {
 
         public JsonNullable<String> name = JsonNullable.undefined();
+        public JsonNullable<Integer> age = JsonNullable.undefined();
 
         public Pet name(JsonNullable<String> name) {
             this.name = name;
+            return this;
+        }
+
+        public Pet age(JsonNullable<Integer> age) {
+            this.age = age;
             return this;
         }
     }
