@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,6 +22,39 @@ public final class JsonNullableSimpleTest {
     public void setup() {
         mapper = new ObjectMapper();
         mapper.registerModule(new JsonNullableModule());
+    }
+
+    @Test
+    public void get() {
+        JsonNullable<String> test = JsonNullable.of("hello");
+        assertTrue(test.isPresent());
+        assertEquals("hello", test.get());
+    }
+
+    @Test
+    public void getMissing() {
+        JsonNullable<String> test = JsonNullable.undefined();
+        assertFalse(test.isPresent());
+        try {
+            test.get();
+            fail("should have thrown exception");
+        } catch (Exception e) {
+            assertTrue(e instanceof NoSuchElementException);
+        }
+    }
+
+    @Test
+    public void orElse() {
+        JsonNullable<String> test = JsonNullable.of("hello");
+        assertTrue(test.isPresent());
+        assertEquals("hello", test.orElse("world"));
+    }
+
+    @Test
+    public void orElseMissing() {
+        JsonNullable<String> test = JsonNullable.undefined();
+        assertFalse(test.isPresent());
+        assertEquals("world", test.orElse("world"));
     }
 
     @Test
