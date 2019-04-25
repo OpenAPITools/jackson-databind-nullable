@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.deser.std.ReferenceTypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+import com.fasterxml.jackson.databind.type.ReferenceType;
 
 import java.io.IOException;
 
@@ -17,15 +18,19 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
 
     private static final long serialVersionUID = 1L;
 
+    private boolean isStringDeserializer = false;
+
     /*
     /**********************************************************
     /* Life-cycle
     /**********************************************************
      */
     public JsonNullableDeserializer(JavaType fullType, ValueInstantiator inst,
-                                    TypeDeserializer typeDeser, JsonDeserializer<?> deser)
-    {
+                                    TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
         super(fullType, inst, typeDeser, deser);
+        if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
+            this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
+        }
     }
 
     /*
@@ -37,7 +42,7 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     @Override
     public JsonNullable<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonToken t = p.getCurrentToken();
-        if (t == JsonToken.VALUE_STRING && !_fullType.isTypeOrSubTypeOf(String.class)) {
+        if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
             String str = p.getText().trim();
             if (str.isEmpty()) {
                 return JsonNullable.undefined();
