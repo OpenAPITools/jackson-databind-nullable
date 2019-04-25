@@ -18,21 +18,50 @@ public class JsonNullable<T> implements Serializable {
         this.isPresent = isPresent;
     }
 
-    public static<T> JsonNullable<T> undefined() {
+    /**
+     * Create a <code>JsonNullable</code> representing an undefined value (not present).
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T> JsonNullable<T> undefined() {
         @SuppressWarnings("unchecked")
         JsonNullable<T> t = (JsonNullable<T>) UNDEFINED;
         return t;
     }
 
+    /**
+     * Create a <code>JsonNullable</code> from the submitted value.
+     *
+     * @param value the value
+     * @param <T>   the type of the value
+     * @return the <code>JsonNullable</code> with the submitted value present.
+     */
     public static <T> JsonNullable<T> of(T value) {
         return new JsonNullable<T>(value, true);
     }
 
+    /**
+     * Obtain the value of this <code>JsonNullable</code>.
+     *
+     * @return the value, if present
+     * @throws NoSuchElementException if no value is present
+     */
     public T get() {
         if (!isPresent) {
             throw new NoSuchElementException("Value is undefined");
         }
         return value;
+    }
+
+    /**
+     * Obtain the value of this <code>JsonNullable</code>.
+     *
+     * @param other the value to be returned if no value is present
+     * @return the value of this <code>JsonNullable</code> if present, the submitted value otherwise
+     */
+    public T orElse(T other) {
+        return this.isPresent ? this.value : other;
     }
 
     public boolean isPresent() {
