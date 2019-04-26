@@ -4,6 +4,8 @@ This module provides a `JsonNullable` wrapper class and a Jackson module to seri
 The `JsonNullable` wrapper shall be used to wrap Java bean fields for which it is important to distinguish between an explicit `"null"` and the field not being present.
 A typical usage is when implementing [Json Merge Patch](https://tools.ietf.org/html/rfc7386) where an explicit `"null"`has the meaning "set this field to null / remove this field" whereas a non-present field has the meaning "don't change the value of this field".
 
+The module comes with an integrated `ValueExtractor` that automatically unwraps the contained value of the `JsonNullable` if used together with javax.validation Bean validation (JSR 380). 
+
 Note : a lot of people use `Optional` to bring this behavior.
 Although it kinda works, it's not a good idea because:
 * Beans shouldn't have `Optional` fields.
@@ -14,7 +16,7 @@ Although it kinda works, it's not a good idea because:
   
 ## Installation
 
-The module is compatible with JDK6+
+The module is compatible with JDK8+
 ```
 ./mvnw clean install
 ```
@@ -26,6 +28,8 @@ The module is compatible with JDK6+
 If we have the following class
 ```java
 public static class Pet {
+    
+    @Size(max = 10)   
     public JsonNullable<String> name = JsonNullable.undefined();
     
     public Pet name(JsonNullable<String> name) {
@@ -49,6 +53,15 @@ assertEquals(JsonNullable.of("Rex"), mapper.readValue("{\"name\":\"Rex\"}", Pet.
 assertEquals(JsonNullable.<String>of(null), mapper.readValue("{\"name\":null}", Pet.class).name);
 assertEquals(JsonNullable.<String>undefined(), mapper.readValue("{}", Pet.class).name);
 
+```
+
+The `ValueExtractor` is registered automatically via Java Service loader mechanism. The example class above will validate as follows
+```java
+// instantiate javax.validation.Validator
+Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+Pet myPet = new Pet().name(JsonNullable.of("My Pet's really long name"));
+Set<ConstraintViolation<Pet>> validationResult = validator.validate(myPet);
+assertTrue(1, validationResult.size());
 ```
 
 ## Limitations
