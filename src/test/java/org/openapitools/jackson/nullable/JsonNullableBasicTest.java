@@ -77,14 +77,14 @@ public class JsonNullableBasicTest extends ModuleTestBase {
         JsonNullable<?> value = MAPPER.readValue("\"simpleString\"",
                 new TypeReference<JsonNullable<String>>() {
                 });
-        assertTrue(value.isPresent());
+        assertValueIsPresent(value);
         assertEquals("simpleString", value.get());
     }
 
     public void testDeserInsideObject() throws Exception {
         JsonNullableData data = MAPPER.readValue("{\"myString\":\"simpleString\"}",
                 JsonNullableData.class);
-        assertTrue(data.myString.isPresent());
+        assertValueIsPresent(data.myString);
         assertEquals("simpleString", data.myString.get());
     }
 
@@ -93,8 +93,8 @@ public class JsonNullableBasicTest extends ModuleTestBase {
         };
         JsonNullable<JsonNullableData> data = MAPPER.readValue(
                 "{\"myString\":\"simpleString\"}", type);
-        assertTrue(data.isPresent());
-        assertTrue(data.get().myString.isPresent());
+        assertValueIsPresent(data);
+        assertValueIsPresent(data.get().myString);
         assertEquals("simpleString", data.get().myString.get());
     }
 
@@ -103,8 +103,8 @@ public class JsonNullableBasicTest extends ModuleTestBase {
         };
         JsonNullable<JsonNullableGenericData<String>> data = MAPPER.readValue(
                 "{\"myData\":\"simpleString\"}", type);
-        assertTrue(data.isPresent());
-        assertTrue(data.get().myData.isPresent());
+        assertValueIsPresent(data);
+        assertValueIsPresent(data.get().myData);
         assertEquals("simpleString", data.get().myData.get());
     }
 
@@ -221,7 +221,7 @@ public class JsonNullableBasicTest extends ModuleTestBase {
         Unit result = MAPPER.readValue(json, Unit.class);
         assertNotNull(result);
         assertNotNull(result.baseUnit);
-        assertTrue(result.baseUnit.isPresent());
+        assertValueIsPresent(result.baseUnit);
         Unit base = result.baseUnit.get();
         assertSame(result, base);
     }
@@ -248,7 +248,7 @@ public class JsonNullableBasicTest extends ModuleTestBase {
 
     public void testDeserNull() throws Exception {
         JsonNullable<?> value = MAPPER.readValue("\"\"", new TypeReference<JsonNullable<Integer>>() {});
-        assertFalse(value.isPresent());
+        assertValueIsEmpty(value);
     }
 
     public void testPolymorphic() throws Exception
@@ -260,7 +260,7 @@ public class JsonNullableBasicTest extends ModuleTestBase {
 
         final Container fromJson = MAPPER.readValue(json, Container.class);
         assertNotNull(fromJson.contained);
-        assertTrue(fromJson.contained.isPresent());
+        assertValueIsPresent(fromJson.contained);
         assertSame(ContainedImpl.class, fromJson.contained.get().getClass());
     }
 }

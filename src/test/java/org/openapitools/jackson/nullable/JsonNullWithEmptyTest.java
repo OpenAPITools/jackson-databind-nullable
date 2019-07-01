@@ -18,7 +18,7 @@ public class JsonNullWithEmptyTest  extends ModuleTestBase
 
     public void testJsonNullableFromEmpty() throws Exception {
         JsonNullable<?> value = MAPPER.readValue(quote(""), new TypeReference<JsonNullable<Integer>>() {});
-        assertFalse(value.isPresent());
+        assertValueIsEmpty(value);
     }
 
     // for [datatype-jdk8#23]
@@ -29,7 +29,7 @@ public class JsonNullWithEmptyTest  extends ModuleTestBase
         BooleanBean b = MAPPER.readValue(aposToQuotes("{'value':''}"), BooleanBean.class);
         assertNotNull(b.value);
 
-        assertFalse(b.value.isPresent());
+        assertValueIsEmpty(b.value);
     }
 
 }

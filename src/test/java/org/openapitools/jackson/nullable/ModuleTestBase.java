@@ -45,4 +45,17 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     protected String aposToQuotes(String json) {
         return json.replace("'", "\"");
     }
+
+    private void assertValue(JsonNullable<?> jsonNullable, boolean present){
+        assertEquals(jsonNullable.isPresent(), present);
+        assertEquals(jsonNullable.isEmpty(), !present);
+    }
+
+    protected void assertValueIsPresent(JsonNullable<?> jsonNullable){
+        assertValue(jsonNullable, true);
+    }
+
+    protected void assertValueIsEmpty(JsonNullable<?> jsonNullable){
+        assertValue(jsonNullable, false);
+    }
 }

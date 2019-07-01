@@ -42,8 +42,8 @@ public class CreatorTest extends ModuleTestBase
         assertNotNull(bean);
         assertNotNull(bean.a);
         assertNotNull(bean.b);
-        assertTrue(bean.a.isPresent());
-        assertFalse(bean.b.isPresent());
+        assertValueIsPresent(bean.a);
+        assertValueIsEmpty(bean.b);
         assertEquals("foo", bean.a.get());
     }
 }
