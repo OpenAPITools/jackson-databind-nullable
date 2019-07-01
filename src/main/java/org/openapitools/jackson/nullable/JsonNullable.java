@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2019 Bosch Software Innovations GmbH. All rights reserved.
- */
-
 package org.openapitools.jackson.nullable;
 
 import java.io.Serializable;
