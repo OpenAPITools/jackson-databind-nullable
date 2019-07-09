@@ -1,5 +1,7 @@
 # jackson-databind-nullable
 
+[![Build Status](https://travis-ci.org/OpenAPITools/jackson-databind-nullable.svg?branch=master)](https://travis-ci.org/OpenAPITools/jackson-databind-nullable)
+
 This module provides a `JsonNullable` wrapper class and a Jackson module to serialize/deserialize it.
 The `JsonNullable` wrapper shall be used to wrap Java bean fields for which it is important to distinguish between an explicit `"null"` and the field not being present.
 A typical usage is when implementing [Json Merge Patch](https://tools.ietf.org/html/rfc7386) where an explicit `"null"`has the meaning "set this field to null / remove this field" whereas a non-present field has the meaning "don't change the value of this field".
