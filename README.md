@@ -41,9 +41,28 @@ public static class Pet {
 }
 
 ```
+And we instantiate the mapper either for JSON
+```java
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+// ...
+
+ObjectMapper mapper = new ObjectMapper();
+mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+mapper.registerModule(new JsonNullableModule());
+```
+or for XML
+```java
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+// ...
+
+XmlMapper xmlMapper = new XmlMapper();
+xmlMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+xmlMapper.registerModule(new JsonNullableModule());
+```
 Then we can serialize
 ```java
-mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
 assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));
 assertEquals("{\"name\":\"Rex\"}", mapper.writeValueAsString(new Pet().name(JsonNullable.of("Rex"))));
