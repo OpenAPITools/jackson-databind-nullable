@@ -11,6 +11,8 @@ import javax.validation.valueextraction.ValueExtractor;
 public class JsonNullableValueExtractor implements ValueExtractor<JsonNullable<@ExtractedValue ?>> {
     @Override
     public void extractValues(JsonNullable<?> originalValue, ValueReceiver receiver) {
-        receiver.value(null, originalValue.isPresent() ? originalValue.get() : null);
+        if (originalValue.isPresent()) {
+            receiver.value(null, originalValue.get());
+        }
     }
 }
