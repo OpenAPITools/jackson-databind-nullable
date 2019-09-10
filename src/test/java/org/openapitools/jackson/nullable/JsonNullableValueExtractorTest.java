@@ -8,6 +8,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
@@ -36,6 +37,22 @@ public class JsonNullableValueExtractorTest {
         assertEquals(4, validate.size());
     }
 
+    @Test
+    public void testValidationIsNotApplied_whenValueIsUndefined() {
+        UnitIssue3 unitIssue = new UnitIssue3();
+        Set<ConstraintViolation<UnitIssue3>> violations = validator.validate(unitIssue);
+        assertEquals(0, violations.size());
+    }
+
+    @Test
+    public void testValidationIsAppliedOnDefinedValue_whenNullValueExtracted() {
+        UnitIssue3 unitIssue = new UnitIssue3();
+        unitIssue.setNotNullString(null);
+        Set<ConstraintViolation<UnitIssue3>> violations = validator.validate(unitIssue);
+        assertEquals(1, violations.size());
+    }
+
+
     private static class UnitIssue2 {
         @Size(max = 10)
         public String restrictedString;
@@ -60,6 +77,15 @@ public class JsonNullableValueExtractorTest {
 
         public void setNullableRestrictedInt(Integer nullableRestrictedInt) {
             this.nullableRestrictedInt = JsonNullable.of(nullableRestrictedInt);
+        }
+    }
+
+    private static class UnitIssue3 {
+        @NotNull
+        private JsonNullable<String> notNullString = JsonNullable.undefined();
+
+        public void setNotNullString(String value) {
+            notNullString = JsonNullable.of(value);
         }
     }
 }
