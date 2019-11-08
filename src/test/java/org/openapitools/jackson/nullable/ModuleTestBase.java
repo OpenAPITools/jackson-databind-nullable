@@ -48,7 +48,7 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
 
     private void assertValue(JsonNullable<?> jsonNullable, boolean present){
         assertEquals(jsonNullable.isPresent(), present);
-        assertEquals(jsonNullable.isEmpty(), !present);
+        assertEquals(jsonNullable.isUndefined(), !present);
     }
 
     protected void assertValueIsPresent(JsonNullable<?> jsonNullable){

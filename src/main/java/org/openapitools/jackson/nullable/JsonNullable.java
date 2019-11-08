@@ -68,7 +68,7 @@ public class JsonNullable<T> implements Serializable {
         return isPresent;
     }
 
-    public boolean isEmpty() {
+    public boolean isUndefined() {
         return !isPresent;
     }
 
