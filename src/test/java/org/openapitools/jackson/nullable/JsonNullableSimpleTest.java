@@ -58,6 +58,30 @@ public final class JsonNullableSimpleTest {
     }
 
     @Test
+    public void ifPresentWithValueNotPresent() {
+        JsonNullable<String> test = JsonNullable.undefined();
+        test.ifPresent(string -> {
+            throw new RuntimeException();
+        });
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void ifPresentWithNullValuePresent() {
+        JsonNullable<String> test = JsonNullable.of(null);
+        test.ifPresent(string -> {
+            throw new RuntimeException();
+        });
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void ifPresentWithNonNullValuePresent() {
+        JsonNullable<String> test = JsonNullable.of("test");
+        test.ifPresent(string -> {
+            throw new RuntimeException();
+        });
+    }
+
+    @Test
     public void serializeNonBeanProperty() throws JsonProcessingException {
         assertEquals("null", mapper.writeValueAsString(JsonNullable.of(null)));
         assertEquals("\"foo\"", mapper.writeValueAsString(JsonNullable.of("foo")));
