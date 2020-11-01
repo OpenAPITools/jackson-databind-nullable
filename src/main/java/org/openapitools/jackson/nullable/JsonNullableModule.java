@@ -1,6 +1,7 @@
 package org.openapitools.jackson.nullable;
 
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.json.PackageVersion;
 import com.fasterxml.jackson.databind.Module;
 
 public class JsonNullableModule extends Module {

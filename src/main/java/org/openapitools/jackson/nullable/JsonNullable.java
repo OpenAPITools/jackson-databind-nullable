@@ -2,6 +2,7 @@ package org.openapitools.jackson.nullable;
 
 import java.io.Serializable;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 public class JsonNullable<T> implements Serializable {
 
@@ -66,6 +67,20 @@ public class JsonNullable<T> implements Serializable {
 
     public boolean isPresent() {
         return isPresent;
+    }
+
+    /**
+     * If a value is present, performs the given action with the value,
+     * otherwise does nothing.
+     *
+     * @param action the action to be performed, if a value is present
+     */
+    public void ifPresent(
+            Consumer<? super T> action) {
+
+        if (this.isPresent) {
+            action.accept(value);
+        }
     }
 
     @Override
