@@ -31,7 +31,7 @@ public class PolymorphicJsonNullableTest extends ModuleTestBase
 
         final Container fromJson = MAPPER.readValue(json, Container.class);
         assertNotNull(fromJson.contained);
-        assertTrue(fromJson.contained.isPresent());
+        assertValueIsPresent(fromJson.contained );
         assertSame(ContainedImpl.class, fromJson.contained.get().getClass());
     }
 }

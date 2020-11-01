@@ -68,6 +68,10 @@ public class JsonNullable<T> implements Serializable {
         return isPresent;
     }
 
+    public boolean isUndefined() {
+        return !isPresent;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
