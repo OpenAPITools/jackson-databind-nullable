@@ -10,14 +10,14 @@
     <packaging>jar</packaging>
     <name>JsonNullable Jackson module</name>
     <description>JsonNullable wrapper class and Jackson module to support fields with meaningful null values.</description>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.2</version>
 
     <url>https://github.com/OpenAPITools/jackson-databind-nullable</url>
     <scm>
         <connection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</connection>
         <developerConnection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</developerConnection>
         <url>https://github.com/OpenAPITools/jackson-databind-nullable</url>
-        <tag>HEAD</tag>
+        <tag>jackson-databind-nullable-0.2.2</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
