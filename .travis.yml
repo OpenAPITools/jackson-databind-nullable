@@ -13,6 +13,7 @@ before_script:
       openssl aes-256-cbc -K $encrypted_6e2c8bba47c6_key -iv $encrypted_6e2c8bba47c6_iv -in sec.gpg.enc -out sec.gpg -d ;
       gpg --keyserver keyserver.ubuntu.com --recv-key $SIGNING_KEY ;
       gpg --check-trustdb ;
+      echo "Created sec.gpg.enc" ;
     fi;
 
 script: ./mvnw clean verify
@@ -20,6 +21,7 @@ script: ./mvnw clean verify
 after_success:
   # push to maven repo
   - if [ $SONATYPE_USERNAME ] && [ -n $TRAVIS_TAG ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+      echo "Deploying ... ";
       if [ "$TRAVIS_BRANCH" = "master" ]; then
         mvn clean deploy -DskipTests=true -B -U -P release --settings .travis.settings.xml;
         echo "Finished mvn clean deploy for $TRAVIS_BRANCH";
