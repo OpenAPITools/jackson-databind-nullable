@@ -19,7 +19,7 @@ script: ./mvnw clean verify
 
 after_success:
   # push to maven repo
-  - if [ $SONATYPE_USERNAME ] && [ -z $TRAVIS_TAG ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+  - if [ $SONATYPE_USERNAME ] && [ -n $TRAVIS_TAG ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       if [ "$TRAVIS_BRANCH" = "master" ]; then
         mvn clean deploy -DskipTests=true -B -U -P release --settings .travis.settings.xml;
         echo "Finished mvn clean deploy for $TRAVIS_BRANCH";
