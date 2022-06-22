@@ -58,6 +58,11 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     }
 
     @Override
+    public Object getAbsentValue(DeserializationContext ctxt) {
+        return JsonNullable.undefined();
+    }
+
+    @Override
     public JsonNullable<Object> getNullValue(DeserializationContext ctxt) {
         return JsonNullable.of(null);
     }
