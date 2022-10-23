@@ -37,6 +37,7 @@
         <!-- Generate PackageVersion.java into this directory. -->
         <packageVersion.dir>org/openapitools/jackson/nullable</packageVersion.dir>
         <packageVersion.package>${project.groupId}.jackson.nullable</packageVersion.package>
+        <jackson.version>2.14.0-rc2</jackson.version>
     </properties>
 
     <dependencies>
