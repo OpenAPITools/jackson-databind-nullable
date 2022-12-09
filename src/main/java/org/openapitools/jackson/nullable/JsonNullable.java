@@ -2,17 +2,18 @@ package org.openapitools.jackson.nullable;
 
 import java.io.Serializable;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class JsonNullable<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final JsonNullable<?> UNDEFINED = new JsonNullable<Object>(null, false);
+    private static final JsonNullable<?> UNDEFINED = new JsonNullable<>(null, false);
 
-    private T value;
+    private final T value;
 
-    private boolean isPresent;
+    private final boolean isPresent;
 
     private JsonNullable(T value, boolean isPresent) {
         this.value = value;
@@ -22,8 +23,8 @@ public class JsonNullable<T> implements Serializable {
     /**
      * Create a <code>JsonNullable</code> representing an undefined value (not present).
      *
-     * @param <T>
-     * @return
+     * @param <T> a type wildcard
+     * @return an empty <code>JsonNullable</code> with no value defined
      */
     public static <T> JsonNullable<T> undefined() {
         @SuppressWarnings("unchecked")
@@ -39,7 +40,7 @@ public class JsonNullable<T> implements Serializable {
      * @return the <code>JsonNullable</code> with the submitted value present.
      */
     public static <T> JsonNullable<T> of(T value) {
-        return new JsonNullable<T>(value, true);
+        return new JsonNullable<>(value, true);
     }
 
     /**
@@ -94,21 +95,13 @@ public class JsonNullable<T> implements Serializable {
         }
 
         JsonNullable<?> other = (JsonNullable<?>) obj;
-        return equals(value, other.value) &&
-                equals(isPresent, other.isPresent);
-    }
-
-    private static boolean equals(Object a, Object b) {
-        return (a == b) || (a != null && a.equals(b));
+        return Objects.equals(value, other.value) &&
+                isPresent == other.isPresent;
     }
 
     @Override
     public int hashCode() {
-        int result = 31 + (value == null ? 0 : value.hashCode());
-        Boolean bool1 = Boolean.TRUE;
-        bool1.hashCode();
-        result = 31 * result + (isPresent ? 1231 : 1237);
-        return result;
+        return Objects.hash(value, isPresent);
     }
 
     @Override
