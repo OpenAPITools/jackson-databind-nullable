@@ -1,15 +1,15 @@
 package org.openapitools.jackson.nullable;
 
-import javax.validation.valueextraction.ExtractedValue;
-import javax.validation.valueextraction.UnwrapByDefault;
-import javax.validation.valueextraction.ValueExtractor;
+import jakarta.validation.valueextraction.ExtractedValue;
+import jakarta.validation.valueextraction.UnwrapByDefault;
+import jakarta.validation.valueextraction.ValueExtractor;
 import java.util.Collection;
 
 /**
- * Extractor for JsonNullable (classic javax-validation version)
+ * Extractor for JsonNullable (modern jakarta-validation version)
  */
 @UnwrapByDefault
-public class JsonNullableValueExtractor implements ValueExtractor<JsonNullable<@ExtractedValue ?>> {
+public class JsonNullableJakartaValueExtractor implements ValueExtractor<JsonNullable<@ExtractedValue ?>> {
     @Override
     public void extractValues(JsonNullable<?> originalValue, ValueReceiver receiver) {
         if (originalValue.isPresent()) {
