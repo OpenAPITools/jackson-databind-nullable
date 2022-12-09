@@ -1,5 +1,7 @@
 package org.openapitools.jackson.nullable;
 
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,13 +19,21 @@ import static org.junit.Assert.assertTrue;
 
 
 public class JsonNullableValueExtractorTest {
-
+    private ValidatorFactory factory;
     private Validator validator;
 
     @Before
     public void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        factory = Validation.byDefaultProvider()
+                .configure()
+                .messageInterpolator(new ParameterMessageInterpolator())
+                .buildValidatorFactory();
         validator = factory.getValidator();
+    }
+
+    @After
+    public void tearDown() {
+        factory.close();
     }
 
     @Test

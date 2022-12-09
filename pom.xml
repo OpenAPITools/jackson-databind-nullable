@@ -57,12 +57,6 @@
             <version>6.2.5.Final</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>3.0.1-b09</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
