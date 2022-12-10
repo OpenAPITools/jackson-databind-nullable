@@ -1,5 +1,6 @@
 package org.openapitools.jackson.nullable;
 
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,13 +18,16 @@ import static org.junit.Assert.assertTrue;
 
 
 public class JsonNullableValueExtractorTest {
-
     private Validator validator;
 
     @Before
     public void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+        try (ValidatorFactory factory = Validation.byDefaultProvider()
+                .configure()
+                .messageInterpolator(new ParameterMessageInterpolator())
+                .buildValidatorFactory()) {
+            validator = factory.getValidator();
+        }
     }
 
     @Test
@@ -31,8 +35,8 @@ public class JsonNullableValueExtractorTest {
         final UnitIssue2 unitIssue2 = new UnitIssue2();
         unitIssue2.setRestrictedString("a >15 character long string");
         unitIssue2.setNullableRestrictedString("a >15 character long string");
-        unitIssue2.setRestrictedInt(Integer.valueOf(16));
-        unitIssue2.setNullableRestrictedInt(Integer.valueOf(16));
+        unitIssue2.setRestrictedInt(16);
+        unitIssue2.setNullableRestrictedInt(16);
 
         final Set<ConstraintViolation<UnitIssue2>> validate = validator.validate(unitIssue2);
 
