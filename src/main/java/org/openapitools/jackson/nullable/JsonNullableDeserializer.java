@@ -28,8 +28,9 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     public JsonNullableDeserializer(JavaType fullType, ValueInstantiator inst,
                                     TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
         super(fullType, inst, typeDeser, deser);
-        if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
-            this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
+        if (fullType instanceof ReferenceType && fullType.getReferencedType() != null) {
+            this.isStringDeserializer = fullType.getReferencedType().isTypeOrSubTypeOf(CharSequence.class)
+                    || fullType.getReferencedType().isTypeOrSubTypeOf(Character.class);
         }
     }
 

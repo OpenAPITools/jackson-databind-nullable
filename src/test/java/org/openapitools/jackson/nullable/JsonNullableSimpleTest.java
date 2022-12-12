@@ -170,6 +170,15 @@ public final class JsonNullableSimpleTest {
         assertEquals(JsonNullable.of(null), values.get(1));
     }
 
+    @Test
+    public void testDeserializeCharacter() throws IOException {
+        assertEquals("{\"field\":\"x\"}", mapper.writeValueAsString(new NullableCharacter().field(JsonNullable.of('x'))));
+        assertEquals(JsonNullable.of('x'), mapper.readValue("{\"field\":\"x\"}", NullableCharacter.class).field);
+        assertEquals(JsonNullable.of(null), mapper.readValue("{\"field\":\"\"}", NullableCharacter.class).field);
+        assertEquals(JsonNullable.of(null), mapper.readValue("{\"field\":null}", NullableCharacter.class).field);
+        assertEquals(JsonNullable.undefined(), mapper.readValue("{}", NullableCharacter.class).field);
+    }
+
     private void testReadPetName(JsonNullable<String> expected, String json) throws IOException {
         Pet pet = mapper.readValue(json, Pet.class);
         JsonNullable<String> name = pet.name;
@@ -180,6 +189,15 @@ public final class JsonNullableSimpleTest {
         Pet pet = mapper.readValue(json, Pet.class);
         JsonNullable<Integer> age = pet.age;
         assertEquals(expected, age);
+    }
+
+    private static class NullableCharacter {
+        public JsonNullable<Character> field = JsonNullable.undefined();
+
+        public NullableCharacter field(JsonNullable<Character> bar) {
+            this.field = bar;
+            return this;
+        }
     }
 
     private static class Pet {
