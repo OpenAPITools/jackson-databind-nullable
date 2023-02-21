@@ -1,6 +1,6 @@
 # jackson-databind-nullable
 
-[![Build Status](https://travis-ci.org/OpenAPITools/jackson-databind-nullable.svg?branch=master)](https://travis-ci.org/OpenAPITools/jackson-databind-nullable)
+[![Build Status](https://api.travis-ci.com/OpenAPITools/jackson-databind-nullable.svg?branch=master&status=passed)](https://app.travis-ci.com/github/OpenAPITools/jackson-databind-nullable)
 
 This module provides a `JsonNullable` wrapper class and a Jackson module to serialize/deserialize it.
 The `JsonNullable` wrapper shall be used to wrap Java bean fields for which it is important to distinguish between an explicit `"null"` and the field not being present.
