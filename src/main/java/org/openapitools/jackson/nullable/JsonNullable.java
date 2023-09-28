@@ -4,15 +4,16 @@ import java.io.Serializable;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class JsonNullable<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private static final JsonNullable<?> UNDEFINED = new JsonNullable<>(null, false);
+    private static final JsonNullable<?> NULL = new JsonNullable<>(null, true);
 
     private final T value;
-
     private final boolean isPresent;
 
     private JsonNullable(T value, boolean isPresent) {
@@ -32,6 +33,11 @@ public class JsonNullable<T> implements Serializable {
         return t;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> JsonNullable<T> ofNull() {
+        return (JsonNullable<T>) NULL;
+    }
+
     /**
      * Create a <code>JsonNullable</code> from the submitted value.
      *
@@ -41,6 +47,31 @@ public class JsonNullable<T> implements Serializable {
      */
     public static <T> JsonNullable<T> of(T value) {
         return new JsonNullable<>(value, true);
+    }
+
+    /**
+     * Returns wrapper of either UNDEFINED or NULL state
+     *
+     * @param value the value
+     * @param <T>   type of value inside
+     * @return <code>JsonNullable</code> in UNDEFINED or NULL state
+     */
+    public static <T> JsonNullable<T> ofMissable(T value) {
+        return new JsonNullable<>(value, value != null);
+    }
+
+    public <R> JsonNullable<R> flatMap(Function<? super T, ? extends JsonNullable<R>> mapper) {
+        if (isNonNull()) {
+            return mapper.apply(value);
+        }
+        return isNull() ? JsonNullable.ofNull() : JsonNullable.undefined();
+    }
+
+    public <R> JsonNullable<R> map(Function<? super T, ? extends R> mapper) {
+        if (isNonNull()) {
+            return JsonNullable.ofMissable(mapper.apply(value));
+        }
+        return isNull() ? JsonNullable.ofNull() : JsonNullable.undefined();
     }
 
     /**
@@ -80,6 +111,25 @@ public class JsonNullable<T> implements Serializable {
             Consumer<? super T> action) {
 
         if (this.isPresent) {
+            action.accept(value);
+        }
+    }
+
+    public boolean isNull() {
+        return isPresent && value == null;
+    }
+
+    public boolean isNonNull() {
+        return isPresent && value != null;
+    }
+
+    /**
+     * If non-null value is present, performs an action with the value
+     *
+     * @param action The action performed with value
+     */
+    public void ifNotNull(Consumer<T> action) {
+        if (isNonNull()) {
             action.accept(value);
         }
     }
