@@ -25,6 +25,30 @@ The module is compatible with JDK8+
 
 ## Usage
 
+Starting from version `0.2.7` the jackson-databind dependency is no longer transitively shipped with this library. Therefore, it needs to be declared explicitly. This enables you to be more flexible in updating the jackson version you are using for your project.
+
+### Maven
+
+```xml
+<dependency>
+  <groupId>org.openapitools</groupId>
+  <artifactId>jackson-databind-nullable</artifactId>
+  <version>0.2.7</version>
+</dependency>
+<dependency>
+  <groupId>com.fasterxml.jackson.core</groupId>
+  <artifactId>jackson-databind</artifactId>
+  <version>2.18.3</version>
+</dependency>
+```
+
+### Gradle
+
+```groovy
+implementation 'org.openapitools:jackson-databind-nullable:0.2.7'
+implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.3'
+```
+
 `JsonNullable` shall primarily be used in bean fields.
 
 If we have the following class
