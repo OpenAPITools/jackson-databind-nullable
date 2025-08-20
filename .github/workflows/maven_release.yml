@@ -65,6 +65,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: apt-get
+        run: |
+          sudo apt-get update
+          sudo apt-get install ca-certificates
+
       - id: install-secret-key
         name: Install gpg secret key
         run: |
