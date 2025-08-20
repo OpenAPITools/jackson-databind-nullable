@@ -98,6 +98,44 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <source>1.8</source>
+                    <doclint>none</doclint>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                    <failOnWarnings>false</failOnWarnings>
+                    <quiet>true</quiet>
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                        <additionalOption>--ignore-source-errors</additionalOption>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
