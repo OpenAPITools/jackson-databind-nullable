@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - master
-    # Sequence of patterns matched against refs/tags
-    #tags:
-    #  - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 jobs:
   build:
     name: Build
@@ -68,7 +65,7 @@ jobs:
       - id: install-secret-key
         name: Install gpg secret key
         run: |
-          cat <(echo -e "${{ secrets.ORG_GPG_PASSPHRASE }}") | gpg --batch --import
+          cat <(echo -e "${{ secrets.ORG_GPG_PRIVATE_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Set up Maven Central Repository
@@ -81,7 +78,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Publish package
-        run: mvn -DskipTests=true --batch-mode -P ossrh-publish -Dgpg.passphrase=${{ secrets.ORG_GPG_PRIVATE_KEY }} deploy
+        run: mvn -DskipTests=true --batch-mode -P ossrh-publish -Dgpg.passphrase=${{ secrets.ORG_GPG_PASSPHRASE }} deploy
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
