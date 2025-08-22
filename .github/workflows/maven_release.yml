@@ -51,6 +51,7 @@ jobs:
         run: mvn -B test
 
   publish-OSSRH:
+    if: github.repository == 'OpenAPITools/jackson-databind-nullable'
     runs-on: ubuntu-latest
     name: Publish to Maven Central
     needs: test
