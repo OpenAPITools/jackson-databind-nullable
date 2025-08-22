@@ -132,7 +132,6 @@
                     <quiet>true</quiet>
                     <additionalOptions>
                         <additionalOption>-Xdoclint:none</additionalOption>
-                        <additionalOption>--ignore-source-errors</additionalOption>
                     </additionalOptions>
                 </configuration>
             </plugin>
