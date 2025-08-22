@@ -21,4 +21,7 @@ target
 *.iws
 .idea/
 
+# VS Code
+.vscode
+
 *.gpg
