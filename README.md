@@ -1,3 +1,5 @@
+## This project is looking for maintainers. Please refer to the [announcement](https://github.com/OpenAPITools/jackson-databind-nullable/issues/71) for more information.
+
 # jackson-databind-nullable
 
 [![Build Status](https://api.travis-ci.com/OpenAPITools/jackson-databind-nullable.svg?branch=master&status=passed)](https://app.travis-ci.com/github/OpenAPITools/jackson-databind-nullable)
