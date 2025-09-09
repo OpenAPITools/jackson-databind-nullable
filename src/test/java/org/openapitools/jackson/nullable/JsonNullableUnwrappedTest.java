@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 // TODO: Make JsonNulllable work with JsonUnwrapped
-@Ignore("JsonNullable currently doesnt work with JsonUnwrapped")
-public class JsonNullableUnwrappedTest extends ModuleTestBase
+@Disabled("JsonNullable currently doesnt work with JsonUnwrapped")
+class JsonNullableUnwrappedTest extends ModuleTestBase
 {
     static class Child {
         public String name = "Bob";
@@ -48,8 +51,8 @@ public class JsonNullableUnwrappedTest extends ModuleTestBase
         public String name;
     }
 
-    public void testUntypedWithJsonNullablesNotNulls() throws Exception
-    {
+    @Test
+    void testUntypedWithJsonNullablesNotNulls() throws Exception {
         final ObjectMapper mapper = mapperWithModule();
         String jsonExp = aposToQuotes("{'XX.name':'Bob'}");
         String jsonAct = mapper.writeValueAsString(new JsonNullableParent());
@@ -57,7 +60,8 @@ public class JsonNullableUnwrappedTest extends ModuleTestBase
     }
 
     // for [datatype-jdk8#20]
-    public void testShouldSerializeUnwrappedJsonNullable() throws Exception {
+    @Test
+    void testShouldSerializeUnwrappedJsonNullable() throws Exception {
         final ObjectMapper mapper = mapperWithModule();
 
         assertEquals("{\"id\":\"foo\"}",
@@ -65,7 +69,8 @@ public class JsonNullableUnwrappedTest extends ModuleTestBase
     }
 
     // for [datatype-jdk8#26]
-    public void testPropogatePrefixToSchema() throws Exception {
+    @Test
+    void testPropogatePrefixToSchema() throws Exception {
         final ObjectMapper mapper = mapperWithModule();
 
         final AtomicReference<String> propertyName = new AtomicReference<String>();

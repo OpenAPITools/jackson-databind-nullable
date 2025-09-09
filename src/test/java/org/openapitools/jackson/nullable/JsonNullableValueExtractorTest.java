@@ -1,8 +1,9 @@
 package org.openapitools.jackson.nullable;
 
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import javax.validation.*;
 import javax.validation.constraints.Max;
@@ -13,15 +14,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
-public class JsonNullableValueExtractorTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class JsonNullableValueExtractorTest {
     private Validator validator;
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    void setUp() {
         try (ValidatorFactory factory = Validation.byDefaultProvider()
                 .configure()
                 .messageInterpolator(new ParameterMessageInterpolator())
@@ -31,7 +32,7 @@ public class JsonNullableValueExtractorTest {
     }
 
     @Test
-    public void testUnwrap() {
+    void testUnwrap() {
         final UnitIssue2 unitIssue2 = new UnitIssue2();
         unitIssue2.setRestrictedString("a >15 character long string");
         unitIssue2.setNullableRestrictedString("a >15 character long string");
@@ -44,14 +45,14 @@ public class JsonNullableValueExtractorTest {
     }
 
     @Test
-    public void testValidationIsNotApplied_whenValueIsUndefined() {
+    void testValidationIsNotApplied_whenValueIsUndefined() {
         UnitIssue3 unitIssue = new UnitIssue3();
         Set<ConstraintViolation<UnitIssue3>> violations = validator.validate(unitIssue);
         assertEquals(0, violations.size());
     }
 
     @Test
-    public void testValidationIsAppliedOnDefinedValue_whenNullValueExtracted() {
+    void testValidationIsAppliedOnDefinedValue_whenNullValueExtracted() {
         UnitIssue3 unitIssue = new UnitIssue3();
         unitIssue.setNotNullString(null);
         Set<ConstraintViolation<UnitIssue3>> violations = validator.validate(unitIssue);
@@ -59,7 +60,7 @@ public class JsonNullableValueExtractorTest {
     }
     
     @Test
-    public void testCollection() {
+    void testCollection() {
         Car aCar = new Car();
 
         // test for java.util.List

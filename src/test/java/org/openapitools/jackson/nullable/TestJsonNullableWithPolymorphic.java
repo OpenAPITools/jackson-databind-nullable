@@ -6,12 +6,15 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TestJsonNullableWithPolymorphic extends ModuleTestBase
-{
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+class TestJsonNullableWithPolymorphic extends ModuleTestBase {
     static class ContainerA {
         @JsonProperty
         private JsonNullable<String> name = JsonNullable.undefined();
@@ -69,7 +72,8 @@ public class TestJsonNullableWithPolymorphic extends ModuleTestBase
 
     final ObjectMapper MAPPER = mapperWithModule();
 
-    public void testJsonNullableMapsFoo() throws Exception {
+    @Test
+    void testJsonNullableMapsFoo() throws Exception {
 
         Map<String, Object> foo = new LinkedHashMap<String, Object>();
         Map<String, Object> loop = new LinkedHashMap<String, Object>();
@@ -82,7 +86,8 @@ public class TestJsonNullableWithPolymorphic extends ModuleTestBase
         _test(MAPPER, foo);
     }
 
-    public void testJsonNullableMapsBar() throws Exception {
+    @Test
+    void testJsonNullableMapsBar() throws Exception {
 
         Map<String, Object> bar = new LinkedHashMap<String, Object>();
         Map<String, Object> loop = new LinkedHashMap<String, Object>();
@@ -95,7 +100,8 @@ public class TestJsonNullableWithPolymorphic extends ModuleTestBase
         _test(MAPPER, bar);
     }
 
-    public void testJsonNullableMapsBaz() throws Exception {
+    @Test
+    void testJsonNullableMapsBaz() throws Exception {
         Map<String, Object> baz = new LinkedHashMap<String, Object>();
         Map<String, Object> loop = new LinkedHashMap<String, Object>();
         loop.put("type", "Baz");
@@ -107,8 +113,8 @@ public class TestJsonNullableWithPolymorphic extends ModuleTestBase
         _test(MAPPER, baz);
     }
 
-    public void testJsonNullableWithTypeAnnotation13() throws Exception
-    {
+    @Test
+    void testJsonNullableWithTypeAnnotation13() throws Exception {
         AbstractJsonNullable result = MAPPER.readValue("{\"value\" : 5}",
                 AbstractJsonNullable.class);
         assertNotNull(result);
