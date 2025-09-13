@@ -3,11 +3,14 @@ package org.openapitools.jackson.nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // TODO: fix JsonNullable in constructor annotated by JsonCreator
-@Ignore("JsonNullable in a constructor is dederialized to JsonNullable[null] instead of JsonNullable.undefined")
-public class CreatorTest extends ModuleTestBase
+@Disabled("JsonNullable in a constructor is dederialized to JsonNullable[null] instead of JsonNullable.undefined")
+class CreatorTest extends ModuleTestBase
 {
     static class CreatorWithJsonNullableStrings
     {
@@ -35,7 +38,8 @@ public class CreatorTest extends ModuleTestBase
      * Test to ensure that creator parameters use defaulting
      * (introduced in Jackson 2.6)
      */
-    public void testCreatorWithJsonNullable() throws Exception
+    @Test
+    void testCreatorWithJsonNullable() throws Exception
     {
         CreatorWithJsonNullableStrings bean = MAPPER.readValue(
                 aposToQuotes("{'a':'foo'}"), CreatorWithJsonNullableStrings.class);

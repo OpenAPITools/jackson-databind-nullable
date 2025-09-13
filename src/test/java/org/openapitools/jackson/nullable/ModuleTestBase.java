@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 
-public abstract class ModuleTestBase extends junit.framework.TestCase
+import static org.junit.jupiter.api.Assertions.fail;
+
+abstract class ModuleTestBase
 {
     /*
     /**********************************************************************
