@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -57,34 +57,31 @@ class JsonNullableInclusionTest extends ModuleTestBase
     private final ObjectMapper MAPPER = mapperWithModule();
 
     @Test
-    void testSerOptNonEmpty() throws Exception {
+    void testSerOptNonEmpty() {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
-                JsonInclude.Include.NON_EMPTY).writeValueAsString(data);
+        String value = mapperWithModule(JsonInclude.Include.NON_EMPTY).writeValueAsString(data);
         assertEquals("{}", value);
     }
 
     @Test
-    void testSerOptNonDefault() throws Exception {
+    void testSerOptNonDefault() {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
-                JsonInclude.Include.NON_DEFAULT).writeValueAsString(data);
+        String value = mapperWithModule(JsonInclude.Include.NON_DEFAULT).writeValueAsString(data);
         assertEquals("{}", value);
     }
 
     @Test
-    void testSerOptNonAbsent() throws Exception {
+    void testSerOptNonAbsent() {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
-                JsonInclude.Include.NON_ABSENT).writeValueAsString(data);
+        String value = mapperWithModule(JsonInclude.Include.NON_ABSENT).writeValueAsString(data);
         assertEquals("{}", value);
     }
 
     @Test
-    void testExcludeEmptyStringViaJsonNullable() throws Exception {
+    void testExcludeEmptyStringViaJsonNullable() {
         String json = MAPPER.writeValueAsString(new JsonNullableNonEmptyStringBean("x"));
         assertEquals("{\"value\":\"x\"}", json);
         json = MAPPER.writeValueAsString(new JsonNullableNonEmptyStringBean(null));
@@ -94,45 +91,46 @@ class JsonNullableInclusionTest extends ModuleTestBase
     }
 
     @Test
-    void testSerPropInclusionAlways() throws Exception {
+    void testSerPropInclusionAlways() {
         JsonInclude.Value incl =
                 JsonInclude.Value.construct(JsonInclude.Include.NON_ABSENT, JsonInclude.Include.ALWAYS);
-        ObjectMapper mapper = mapperWithModule().setDefaultPropertyInclusion(incl);
+        ObjectMapper mapper = mapperBuilderWithModule().changeDefaultPropertyInclusion(incl_ -> incl).build();
         assertEquals("{\"myData\":true}",
                 mapper.writeValueAsString(JsonNullableGenericData.construct(Boolean.TRUE)));
     }
 
     @Test
-    void testSerPropInclusionNonNull() throws Exception {
+    void testSerPropInclusionNonNull() {
         JsonInclude.Value incl =
                 JsonInclude.Value.construct(JsonInclude.Include.NON_ABSENT, JsonInclude.Include.NON_NULL);
-        ObjectMapper mapper = mapperWithModule().setDefaultPropertyInclusion(incl);
+        ObjectMapper mapper = mapperBuilderWithModule().changeDefaultPropertyInclusion(incl_ -> incl).build();
         assertEquals("{\"myData\":true}",
                 mapper.writeValueAsString(JsonNullableGenericData.construct(Boolean.TRUE)));
     }
 
     @Test
-    void testSerPropInclusionNonAbsent() throws Exception {
+    void testSerPropInclusionNonAbsent() {
         JsonInclude.Value incl =
                 JsonInclude.Value.construct(JsonInclude.Include.NON_ABSENT, JsonInclude.Include.NON_ABSENT);
-        ObjectMapper mapper = mapperWithModule().setDefaultPropertyInclusion(incl);
+        ObjectMapper mapper = mapperBuilderWithModule().changeDefaultPropertyInclusion(incl_ -> incl).build();
         assertEquals("{\"myData\":true}",
                 mapper.writeValueAsString(JsonNullableGenericData.construct(Boolean.TRUE)));
     }
 
     @Test
-    void testSerPropInclusionNonEmpty() throws Exception {
+    void testSerPropInclusionNonEmpty() {
         JsonInclude.Value incl =
                 JsonInclude.Value.construct(JsonInclude.Include.NON_ABSENT, JsonInclude.Include.NON_EMPTY);
-        ObjectMapper mapper = mapperWithModule().setDefaultPropertyInclusion(incl);
+        ObjectMapper mapper = mapperBuilderWithModule().changeDefaultPropertyInclusion(incl_ -> incl).build();
         assertEquals("{\"myData\":true}",
                 mapper.writeValueAsString(JsonNullableGenericData.construct(Boolean.TRUE)));
     }
 
     @Test
-    void testMapElementInclusion() throws Exception {
-        ObjectMapper mapper = mapperWithModule().setDefaultPropertyInclusion(
-                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_ABSENT));
+    void testMapElementInclusion() {
+        JsonInclude.Value incl =
+                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_ABSENT);
+        ObjectMapper mapper = mapperBuilderWithModule().changeDefaultPropertyInclusion(incl_ -> incl).build();
         // first: Absent entry/-ies should NOT be included
         assertEquals("{\"values\":{}}",
                 mapper.writeValueAsString(new OptMapBean("key", JsonNullable.undefined())));

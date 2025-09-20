@@ -45,23 +45,23 @@ public static class Pet {
 ```
 And we instantiate the mapper either for JSON
 ```java
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 // ...
 
-ObjectMapper mapper = new ObjectMapper();
-mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-mapper.registerModule(new JsonNullableModule());
+JsonMapper mapper = JsonMapper.builder().addModule(new JsonNullableModule())
+                                        .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                                        .build();
 ```
 or for XML
 ```java
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 // ...
 
-XmlMapper xmlMapper = new XmlMapper();
-xmlMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-xmlMapper.registerModule(new JsonNullableModule());
+XmlMapper mapper = XmlMapper.builder().addModule(new JsonNullableModule())
+                                      .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                                      .build();
 ```
 Then we can serialize
 ```java

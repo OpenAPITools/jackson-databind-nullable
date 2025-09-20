@@ -1,8 +1,11 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -16,9 +19,17 @@ abstract class ModuleTestBase
 
     protected ObjectMapper mapperWithModule()
     {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JsonNullableModule());
-        return mapper;
+        return mapperBuilderWithModule().build();
+    }
+
+    protected ObjectMapper mapperWithModule(JsonInclude.Include include)
+    {
+        return mapperBuilderWithModule().changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(include)).build();
+    }
+
+    protected JsonMapper.Builder mapperBuilderWithModule()
+    {
+        return JsonMapper.builder().addModule(new JsonNullableModule());
     }
 
     /*

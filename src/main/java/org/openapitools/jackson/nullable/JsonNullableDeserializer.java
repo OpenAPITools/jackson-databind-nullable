@@ -1,18 +1,17 @@
 package org.openapitools.jackson.nullable;
 
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.deser.ValueInstantiator;
-import com.fasterxml.jackson.databind.deser.std.ReferenceTypeDeserializer;
-import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
-import com.fasterxml.jackson.databind.type.ReferenceType;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationConfig;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.ValueInstantiator;
+import tools.jackson.databind.deser.std.ReferenceTypeDeserializer;
+import tools.jackson.databind.jsontype.TypeDeserializer;
+import tools.jackson.databind.type.ReferenceType;
 
 public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNullable<Object>> {
 
@@ -26,7 +25,7 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     /**********************************************************
      */
     public JsonNullableDeserializer(JavaType fullType, ValueInstantiator inst,
-                                    TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
+                                    TypeDeserializer typeDeser, ValueDeserializer<?> deser) {
         super(fullType, inst, typeDeser, deser);
         if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
             this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
@@ -40,10 +39,10 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
      */
 
     @Override
-    public JsonNullable<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        JsonToken t = p.getCurrentToken();
+    public JsonNullable<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+        JsonToken t = p.currentToken();
         if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
-            String str = p.getText().trim();
+            String str = p.getString().trim();
             if (str.isEmpty()) {
                 return JsonNullable.undefined();
             }
@@ -52,7 +51,7 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     }
 
     @Override
-    public JsonNullableDeserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
+    protected ReferenceTypeDeserializer<JsonNullable<Object>> withResolved(TypeDeserializer typeDeser, ValueDeserializer<?> valueDeser) {
         return new JsonNullableDeserializer(_fullType, _valueInstantiator,
                 typeDeser, valueDeser);
     }

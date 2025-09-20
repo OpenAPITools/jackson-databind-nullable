@@ -2,7 +2,7 @@ package org.openapitools.jackson.nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ class CreatorTest extends ModuleTestBase
      * (introduced in Jackson 2.6)
      */
     @Test
-    void testCreatorWithJsonNullable() throws Exception
+    void testCreatorWithJsonNullable()
     {
         CreatorWithJsonNullableStrings bean = MAPPER.readValue(
                 aposToQuotes("{'a':'foo'}"), CreatorWithJsonNullableStrings.class);

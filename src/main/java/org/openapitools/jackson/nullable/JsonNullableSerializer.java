@@ -1,11 +1,11 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
-import com.fasterxml.jackson.databind.type.ReferenceType;
-import com.fasterxml.jackson.databind.util.NameTransformer;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.jsontype.TypeSerializer;
+import tools.jackson.databind.ser.std.ReferenceTypeSerializer;
+import tools.jackson.databind.type.ReferenceType;
+import tools.jackson.databind.util.NameTransformer;
 
 public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable<?>> {
 
@@ -18,12 +18,12 @@ public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable
      */
 
     protected JsonNullableSerializer(ReferenceType fullType, boolean staticTyping,
-                                     TypeSerializer vts, JsonSerializer<Object> ser) {
+                                     TypeSerializer vts, ValueSerializer<Object> ser) {
         super(fullType, staticTyping, vts, ser);
     }
 
     protected JsonNullableSerializer(JsonNullableSerializer base, BeanProperty property,
-                                     TypeSerializer vts, JsonSerializer<?> valueSer, NameTransformer unwrapper,
+                                     TypeSerializer vts, ValueSerializer<?> valueSer, NameTransformer unwrapper,
                                      Object suppressableValue)
     {
         // Keep suppressNulls to false to always serialize JsonNullable[null]
@@ -33,7 +33,7 @@ public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable
 
     @Override
     protected ReferenceTypeSerializer<JsonNullable<?>> withResolved(BeanProperty prop,
-                                                                    TypeSerializer vts, JsonSerializer<?> valueSer,
+                                                                    TypeSerializer vts, ValueSerializer<?> valueSer,
                                                                     NameTransformer unwrapper)
     {
         return new JsonNullableSerializer(this, prop, vts, valueSer, unwrapper,

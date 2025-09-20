@@ -3,17 +3,18 @@ package org.openapitools.jackson.nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.deser.std.StdScalarDeserializer;
+import tools.jackson.databind.ser.std.StdScalarSerializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -103,27 +104,25 @@ class JsonNullableTest extends ModuleTestBase
         public CaseChangingStringWrapper(String s) { value = JsonNullable.of(s); }
     }
 
-    @SuppressWarnings("serial")
     public static class UpperCasingSerializer extends StdScalarSerializer<String>
     {
         public UpperCasingSerializer() { super(String.class); }
 
         @Override
         public void serialize(String value, JsonGenerator gen,
-                              SerializerProvider provider) throws IOException {
+                              SerializationContext provider) throws JacksonException {
             gen.writeString(value.toUpperCase());
         }
     }
 
-    @SuppressWarnings("serial")
     public static class LowerCasingDeserializer extends StdScalarDeserializer<String>
     {
         public LowerCasingDeserializer() { super(String.class); }
 
         @Override
         public String deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException, JsonProcessingException {
-            return p.getText().toLowerCase();
+                throws JacksonException {
+            return p.getString().toLowerCase();
         }
     }
 
@@ -141,50 +140,48 @@ class JsonNullableTest extends ModuleTestBase
      */
 
     @Test
-    void testStringAbsent() throws Exception {
+    void testStringAbsent() {
         assertNull(roundtrip(JsonNullable.<String>undefined(), JSON_NULLABLE_STRING_TYPE).get());
     }
     @Test
-    void testStringNull() throws Exception {
+    void testStringNull() {
         assertNull(roundtrip(JsonNullable.<String>of(null), JSON_NULLABLE_STRING_TYPE).get());
     }
 
     @Test
-    void testStringPresent() throws Exception {
+    void testStringPresent() {
         assertEquals("test", roundtrip(JsonNullable.of("test"), JSON_NULLABLE_STRING_TYPE).get());
     }
 
     @Test
-    void testBeanAdsent() throws Exception {
+    void testBeanAdsent() {
         assertNull(roundtrip(JsonNullable.<TestBean>undefined(), JSON_NULLABLE_BEAN_TYPE).get());
     }
 
     @Test
-    void testBeanNull() throws Exception {
+    void testBeanNull() {
         assertNull(roundtrip(JsonNullable.<TestBean>of(null), JSON_NULLABLE_BEAN_TYPE).get());
     }
 
     @Test
-    void testBeanPresent() throws Exception {
+    void testBeanPresent() {
         final TestBean bean = new TestBean(Integer.MAX_VALUE, "woopwoopwoopwoopwoop");
         assertEquals(bean, roundtrip(JsonNullable.of(bean), JSON_NULLABLE_BEAN_TYPE).get());
     }
 
     // [issue#4]
     @Test
-    void testBeanWithCreator() throws Exception {
+    void testBeanWithCreator() {
         final Issue4Entity emptyEntity = new Issue4Entity(JsonNullable.<String>of(null));
         final String json = MAPPER.writeValueAsString(emptyEntity);
 
         final Issue4Entity deserialisedEntity = MAPPER.readValue(json, Issue4Entity.class);
-        if (!deserialisedEntity.equals(emptyEntity)) {
-            throw new IOException("Entities not equal");
-        }
+        assertEquals(emptyEntity, deserialisedEntity);
     }
 
     // [issue#4]
     @Test
-    void testJsonNullableStringInBean() throws Exception {
+    void testJsonNullableStringInBean() {
         JsonNullableStringBean bean = MAPPER.readValue("{\"value\":\"xyz\"}", JsonNullableStringBean.class);
         assertNotNull(bean.value);
         assertEquals("xyz", bean.value.get());
@@ -192,9 +189,8 @@ class JsonNullableTest extends ModuleTestBase
 
     // To support [datatype-jdk8#8]
     @Test
-    void testExcludeIfJsonNullableAbsent() throws Exception {
-        ObjectMapper mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    void testExcludeIfJsonNullableAbsent() {
+        ObjectMapper mapper = mapperWithModule(JsonInclude.Include.NON_NULL);
         assertEquals(aposToQuotes("{'value':'foo'}"),
                 mapper.writeValueAsString(new JsonNullableStringBean("foo")));
         // absent is not strictly null so
@@ -202,8 +198,7 @@ class JsonNullableTest extends ModuleTestBase
                 mapper.writeValueAsString(new JsonNullableStringBean(null)));
 
         // however:
-        mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+        mapper = mapperWithModule(JsonInclude.Include.NON_ABSENT);
         assertEquals(aposToQuotes("{'value':'foo'}"),
                 mapper.writeValueAsString(new JsonNullableStringBean("foo")));
         assertEquals(aposToQuotes("{\"value\":null}"),
@@ -211,7 +206,7 @@ class JsonNullableTest extends ModuleTestBase
     }
 
     @Test
-    void testWithCustomDeserializer() throws Exception {
+    void testWithCustomDeserializer() {
         CaseChangingStringWrapper w = MAPPER.readValue(aposToQuotes("{'value':'FoobaR'}"),
                 CaseChangingStringWrapper.class);
         assertEquals("foobar", w.value.get());
@@ -219,7 +214,7 @@ class JsonNullableTest extends ModuleTestBase
 
     // [modules-java8#36]
     @Test
-    void testWithCustomDeserializerIfJsonNullableAbsent() throws Exception {
+    void testWithCustomDeserializerIfJsonNullableAbsent() {
         // 10-Aug-2017, tatu: Actually this is not true: missing value does not trigger
         //    specific handling
         /*
@@ -232,16 +227,15 @@ class JsonNullableTest extends ModuleTestBase
     }
 
     @Test
-    void testCustomSerializer() throws Exception {
+    void testCustomSerializer() {
         final String VALUE = "fooBAR";
         String json = MAPPER.writeValueAsString(new CaseChangingStringWrapper(VALUE));
         assertEquals(json, aposToQuotes("{'value':'FOOBAR'}"));
     }
 
     @Test
-    void testCustomSerializerIfJsonNullableAbsent() throws Exception {
-        ObjectMapper mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    void testCustomSerializerIfJsonNullableAbsent() {
+        ObjectMapper mapper = mapperWithModule(JsonInclude.Include.NON_NULL);
         assertEquals(aposToQuotes("{'value':'FOO'}"),
                 mapper.writeValueAsString(new CaseChangingStringWrapper("foo")));
         // absent is not strictly null so
@@ -251,8 +245,7 @@ class JsonNullableTest extends ModuleTestBase
                 mapper.writeValueAsString(new CaseChangingStringWrapper()));
 
         // however:
-        mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+        mapper = mapperWithModule(JsonInclude.Include.NON_ABSENT);
         assertEquals(aposToQuotes("{'value':'FOO'}"),
                 mapper.writeValueAsString(new CaseChangingStringWrapper("foo")));
         assertEquals(aposToQuotes("{'value':null}"),
@@ -263,7 +256,7 @@ class JsonNullableTest extends ModuleTestBase
 
     // [modules-java8#33]: Verify against regression...
     @Test
-    void testOtherRefSerializers() throws Exception {
+    void testOtherRefSerializers() {
         String json = MAPPER.writeValueAsString(new AtomicReference<String>("foo"));
         assertEquals(quote("foo"), json);
     }
@@ -274,7 +267,7 @@ class JsonNullableTest extends ModuleTestBase
     /**********************************************************
      */
 
-    private <T> JsonNullable<T> roundtrip(JsonNullable<T> obj, TypeReference<JsonNullable<T>> type) throws IOException {
+    private <T> JsonNullable<T> roundtrip(JsonNullable<T> obj, TypeReference<JsonNullable<T>> type) {
         String bytes = MAPPER.writeValueAsString(obj);
         return MAPPER.readValue(bytes, type);
     }

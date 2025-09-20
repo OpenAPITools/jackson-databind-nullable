@@ -1,13 +1,14 @@
 package org.openapitools.jackson.nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -16,12 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 final class JsonNullableSimpleTest {
 
-    private ObjectMapper mapper;
+    private JsonMapper.Builder mapperBuilder;
 
     @BeforeEach
     void setup() {
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JsonNullableModule());
+        mapperBuilder = JsonMapper.builder().addModule(new JsonNullableModule());
     }
 
     @Test
@@ -82,7 +82,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void serializeNonBeanProperty() throws JsonProcessingException {
+    void serializeNonBeanProperty() {
+        ObjectMapper mapper = mapperBuilder.build();
         assertEquals("null", mapper.writeValueAsString(JsonNullable.of(null)));
         assertEquals("\"foo\"", mapper.writeValueAsString(JsonNullable.of("foo")));
         // TODO: Serialize non bean JsonNullable.undefined to empty string
@@ -91,7 +92,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void serializeAlways() throws JsonProcessingException {
+    void serializeAlways() {
+        ObjectMapper mapper = mapperBuilder.build();
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
         assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(null)));
         assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));
@@ -99,8 +101,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void serializeNonNull() throws JsonProcessingException {
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    void serializeNonNull() {
+        ObjectMapper mapper = mapperBuilder.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)).build();
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(null)));
         assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));
@@ -108,8 +110,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void serializeNonAbsent() throws JsonProcessingException {
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+    void serializeNonAbsent() {
+        ObjectMapper mapper = mapperBuilder.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_ABSENT)).build();
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(null)));
         assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));
@@ -117,7 +119,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void serializeCollection() throws JsonProcessingException {
+    void serializeCollection() {
+        ObjectMapper mapper = mapperBuilder.build();
         assertEquals("[\"foo\",null,null,null]", mapper.writeValueAsString(Arrays.asList(
                 JsonNullable.of("foo"),
                 JsonNullable.of(null),
@@ -127,7 +130,7 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void deserializeStringMembers() throws IOException {
+    void deserializeStringMembers() {
         testReadPetName(JsonNullable.of("Rex"), "{\"name\":\"Rex\"}");
         testReadPetName(JsonNullable.<String>of(null), "{\"name\":null}");
         testReadPetName(JsonNullable.<String>of(""), "{\"name\":\"\"}");
@@ -136,7 +139,7 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void deserializeNonStringMembers() throws IOException {
+    void deserializeNonStringMembers() {
         testReadPetAge(JsonNullable.of(Integer.valueOf(15)), "{\"age\":\"15\"}");
         testReadPetAge(JsonNullable.<Integer>of(null), "{\"age\":null}");
         testReadPetAge(JsonNullable.<Integer>undefined(), "{\"age\":\"\"}");
@@ -145,7 +148,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void deserializeStringNonBeanMembers() throws IOException {
+    void deserializeStringNonBeanMembers() {
+        ObjectMapper mapper = mapperBuilder.build();
         assertEquals(JsonNullable.of(null), mapper.readValue("null", new TypeReference<JsonNullable<String>>() {
         }));
         assertEquals(JsonNullable.of("42"), mapper.readValue("\"42\"", new TypeReference<JsonNullable<String>>() {
@@ -157,7 +161,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void deserializeNonStringNonBeanMembers() throws IOException {
+    void deserializeNonStringNonBeanMembers() {
+        ObjectMapper mapper = mapperBuilder.build();
         assertEquals(JsonNullable.of(null), mapper.readValue("\"null\"", new TypeReference<JsonNullable<Integer>>() {
         }));
         assertEquals(JsonNullable.of(42), mapper.readValue("\"42\"", new TypeReference<JsonNullable<Integer>>() {
@@ -169,7 +174,8 @@ final class JsonNullableSimpleTest {
     }
 
     @Test
-    void deserializeCollection() throws IOException {
+    void deserializeCollection() {
+        ObjectMapper mapper = mapperBuilder.build();
         List<JsonNullable<String>> values = mapper.readValue("[\"foo\", null]",
                 new TypeReference<List<JsonNullable<String>>>() {
                 });
@@ -178,13 +184,15 @@ final class JsonNullableSimpleTest {
         assertEquals(JsonNullable.of(null), values.get(1));
     }
 
-    private void testReadPetName(JsonNullable<String> expected, String json) throws IOException {
+    private void testReadPetName(JsonNullable<String> expected, String json) {
+        ObjectMapper mapper = mapperBuilder.build();
         Pet pet = mapper.readValue(json, Pet.class);
         JsonNullable<String> name = pet.name;
         assertEquals(expected, name);
     }
 
-    private void testReadPetAge(JsonNullable<Integer> expected, String json) throws IOException {
+    private void testReadPetAge(JsonNullable<Integer> expected, String json) {
+        ObjectMapper mapper = mapperBuilder.build();
         Pet pet = mapper.readValue(json, Pet.class);
         JsonNullable<Integer> age = pet.age;
         assertEquals(expected, age);
