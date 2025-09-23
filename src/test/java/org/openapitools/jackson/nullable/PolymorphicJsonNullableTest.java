@@ -3,9 +3,11 @@ package org.openapitools.jackson.nullable;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
-public class PolymorphicJsonNullableTest extends ModuleTestBase
-{
+import static org.junit.jupiter.api.Assertions.*;
+
+class PolymorphicJsonNullableTest extends ModuleTestBase {
     // For [datatype-jdk8#14]
     public static class Container {
         public JsonNullable<Contained> contained;
@@ -22,8 +24,8 @@ public class PolymorphicJsonNullableTest extends ModuleTestBase
     private final ObjectMapper MAPPER = mapperWithModule();
 
     // [datatype-jdk8#14]
-    public void testPolymorphic14() throws Exception
-    {
+    @Test
+    void testPolymorphic14() throws Exception {
         final Container dto = new Container();
         dto.contained = JsonNullable.<Contained>of(new ContainedImpl());
 

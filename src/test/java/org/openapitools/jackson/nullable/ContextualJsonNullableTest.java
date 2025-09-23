@@ -3,12 +3,15 @@ package org.openapitools.jackson.nullable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class ContextualJsonNullableTest extends ModuleTestBase
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ContextualJsonNullableTest extends ModuleTestBase
 {
     // [datatypes-java8#17]
     @JsonPropertyOrder({ "date", "date1", "date2" })
@@ -29,7 +32,8 @@ public class ContextualJsonNullableTest extends ModuleTestBase
     /**********************************************************
      */
 
-    public void testContextualJsonNullables() throws Exception
+    @Test
+    void testContextualJsonNullables() throws Exception
     {
         final ObjectMapper mapper = mapperWithModule();
         SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
