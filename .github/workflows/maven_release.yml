@@ -1,9 +1,12 @@
 name: Make release
 
+permissions: { }
+
 on:
   push:
     branches:
       - master
+
 jobs:
   build:
     name: Build
@@ -17,8 +20,16 @@ jobs:
         with:
           java-version: 8
           distribution: 'temurin'
-      - name: Cache Maven packages
+      - name: Cache and restore Maven packages on master
         uses: actions/cache@v3
+        if: ${{ github.ref_name == 'master' }}
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Restore Maven packages on PR
+        uses: actions/cache/restore@v3
+        if: ${{ github.ref_name != 'master' }}
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -26,35 +37,11 @@ jobs:
       - name: Build
         run: mvn clean verify
 
-  test:
-    name: Test
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Set up JDK 8
-        uses: actions/setup-java@v3
-        with:
-          java-version: 8
-          distribution: 'temurin'
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Build
-        run: mvn clean package install -DskipTests=true
-      - name: Build, test
-        run: mvn -B test
-
   publish-OSSRH:
     if: github.repository == 'OpenAPITools/jackson-databind-nullable'
     runs-on: ubuntu-latest
     name: Publish to Maven Central
-    needs: test
+    needs: build
     permissions:
       contents: read
       packages: write
@@ -62,7 +49,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
- 
+
       - id: install-secret-key
         name: Install gpg secret key
         run: |
@@ -79,7 +66,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Publish package
-        run: mvn -DskipTests=true --batch-mode -P ossrh-publish -Dgpg.passphrase=${{ secrets.ORG_GPG_PASSPHRASE }} deploy
+        run: mvn -Dmaven.test.skip=true --batch-mode -P ossrh-publish -Dgpg.passphrase=${{ secrets.ORG_GPG_PASSPHRASE }} deploy
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
