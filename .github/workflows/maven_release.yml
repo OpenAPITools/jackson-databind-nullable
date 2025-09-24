@@ -21,14 +21,14 @@ jobs:
           java-version: 8
           distribution: 'temurin'
       - name: Cache and restore Maven packages on master
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: ${{ github.ref_name == 'master' }}
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Restore Maven packages on PR
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         if: ${{ github.ref_name != 'master' }}
         with:
           path: ~/.m2
