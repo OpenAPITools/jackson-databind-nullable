@@ -1,9 +1,13 @@
 name: Test
 
+permissions: { }
+
 on:
-  push:
-    branches-ignore:
-      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -18,8 +22,16 @@ jobs:
         with:
           java-version: 11
           distribution: 'temurin'
-      - name: Cache Maven packages
+      - name: Cache and restore Maven packages on master
         uses: actions/cache@v3
+        if: ${{ github.ref_name == 'master' }}
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Restore Maven packages on PR
+        uses: actions/cache/restore@v3
+        if: ${{ github.ref_name != 'master' }}
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
