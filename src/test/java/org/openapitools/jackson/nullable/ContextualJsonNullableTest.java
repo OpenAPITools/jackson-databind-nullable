@@ -2,7 +2,7 @@ package org.openapitools.jackson.nullable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
@@ -33,12 +33,13 @@ class ContextualJsonNullableTest extends ModuleTestBase
      */
 
     @Test
-    void testContextualJsonNullables() throws Exception
+    void testContextualJsonNullables()
     {
-        final ObjectMapper mapper = mapperWithModule();
         SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        mapper.setDateFormat(df);
+
+        final ObjectMapper mapper = mapperBuilderWithModule().defaultDateFormat(df).build();
+
         ContextualJsonNullables input = new ContextualJsonNullables();
         input.date = JsonNullable.of(new Date(0L));
         input.date1 = JsonNullable.of(new Date(0L));
