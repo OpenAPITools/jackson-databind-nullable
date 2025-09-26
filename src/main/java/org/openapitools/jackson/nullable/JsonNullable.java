@@ -250,7 +250,7 @@ public class JsonNullable<T> implements Serializable {
             throw new NullPointerException("mapping function is null");
         }
         if (!this.isPresent) {
-            return (JsonNullable<U>)this;
+            return undefined();
         }
 
         JsonNullable<U> mapped = (JsonNullable<U>)mapper.apply(value);
