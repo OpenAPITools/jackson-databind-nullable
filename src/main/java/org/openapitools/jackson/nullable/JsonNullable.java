@@ -109,6 +109,8 @@ public class JsonNullable<T> implements Serializable {
      *        thrown
      * @return the value, if present
      * @throws X if no value is present
+     * @throws NullPointerException if no value is present and the exception
+     *         supplying function is {@code null}
      *
      * @since 0.2.8
      */
