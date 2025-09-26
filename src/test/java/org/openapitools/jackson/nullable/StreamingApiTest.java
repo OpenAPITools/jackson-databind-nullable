@@ -203,8 +203,8 @@ public class StreamingApiTest {
             { "or null supplied on value"     , JSON_VALUE, supplier(NULL)      , equalTo(JSON_VALUE)   , supplier(NULL)            , equalTo(EQUIVALENT_VALUE) },
             { "or null supplied on null"      , JSON_NULL , supplier(NULL)      , equalTo(JSON_NULL)    , supplier(NULL)            , equalTo(EQUIVALENT_NULL)  },
             { "or null supplied on undefined" , UNDEFINED , supplier(NULL)      , nullPointerException(), supplier(NULL)            , nullPointerException()    },
-            { "or null supplier on value"     , JSON_VALUE, NULL_SUPPLIER       , equalTo(JSON_VALUE)   , NULL_SUPPLIER             , equalTo(EQUIVALENT_VALUE) }, // Equivalent throws NullPointerException
-            { "or null supplier on null"      , JSON_NULL , NULL_SUPPLIER       , equalTo(JSON_NULL)    , NULL_SUPPLIER             , equalTo(EQUIVALENT_NULL)  }, // Equivalent throws NullPointerException
+            { "or null supplier on value"     , JSON_VALUE, NULL_SUPPLIER       , nullPointerException(), NULL_SUPPLIER             , nullPointerException()    },
+            { "or null supplier on null"      , JSON_NULL , NULL_SUPPLIER       , nullPointerException(), NULL_SUPPLIER             , nullPointerException()    },
             { "or null supplier on undefined" , UNDEFINED , NULL_SUPPLIER       , nullPointerException(), NULL_SUPPLIER             , nullPointerException()    },
         });
     }
@@ -328,7 +328,7 @@ public class StreamingApiTest {
             { "map on undefined"             , UNDEFINED , MAPPING     , equalTo(UNDEFINED)                , EQUIVALENT_MAPPING     , equalTo(EQUIVALENT_UNDEFINED)                           },
             { "map null mapping on value"    , JSON_VALUE, NULL_MAPPING, nullPointerException()            , EQUIVALENT_NULL_MAPPING, nullPointerException()                                  },
             { "map null mapping on null"     , JSON_NULL , NULL_MAPPING, nullPointerException()            , EQUIVALENT_NULL_MAPPING, nullPointerException()                                  },
-            { "map null mapping on undefined", UNDEFINED , NULL_MAPPING, equalTo(UNDEFINED)                , EQUIVALENT_NULL_MAPPING, equalTo(EQUIVALENT_UNDEFINED)                           }, // Equivalent throws NullPointerException
+            { "map null mapping on undefined", UNDEFINED , NULL_MAPPING, nullPointerException()            , EQUIVALENT_NULL_MAPPING, nullPointerException()                                  },
         });
       }
 
@@ -371,7 +371,7 @@ public class StreamingApiTest {
             { "filter remove on undefined"        , UNDEFINED , KEEP_NONE     , equalTo(UNDEFINED)    , EQUIVALENT_KEEP_NONE     , equalTo(EQUIVALENT_UNDEFINED) },
             { "filter null predicate on value"    , JSON_VALUE, NULL_PREDICATE, nullPointerException(), EQUIVALENT_NULL_PREDICATE, nullPointerException()        },
             { "filter null predicate on null"     , JSON_NULL , NULL_PREDICATE, nullPointerException(), EQUIVALENT_NULL_PREDICATE, nullPointerException()        },
-            { "filter null predicate on undefined", UNDEFINED , NULL_PREDICATE, equalTo(UNDEFINED)    , EQUIVALENT_NULL_PREDICATE, equalTo(EQUIVALENT_UNDEFINED) }, // Equivalent throws NullPointerException.
+            { "filter null predicate on undefined", UNDEFINED , NULL_PREDICATE, nullPointerException(), EQUIVALENT_NULL_PREDICATE, nullPointerException()        },
         });
       }
 
@@ -411,7 +411,7 @@ public class StreamingApiTest {
             { "flatMap any to other on undefined"     , UNDEFINED , ANY_TO_OTHER     , equalTo(UNDEFINED)    , EQUIVALENT_ANY_TO_OTHER     , equalTo(EQUIVALENT_UNDEFINED) },
             { "flatMap null mapping on value"         , JSON_VALUE, NULL_MAPPING     , nullPointerException(), EQUIVALENT_NULL_MAPPING     , nullPointerException()        },
             { "flatMap null mapping on null"          , JSON_NULL , NULL_MAPPING     , nullPointerException(), EQUIVALENT_NULL_MAPPING     , nullPointerException()        },
-            { "flatMap null mapping on undefined"     , UNDEFINED , NULL_MAPPING     , equalTo(UNDEFINED)    , EQUIVALENT_NULL_MAPPING     , equalTo(EQUIVALENT_UNDEFINED) }, // Equivalent throwing NullPointerException.
+            { "flatMap null mapping on undefined"     , UNDEFINED , NULL_MAPPING     , nullPointerException(), EQUIVALENT_NULL_MAPPING     , nullPointerException()        },
             { "flatMap null result on value"          , JSON_VALUE, NULL_RESULT      , nullPointerException(), EQUIVALENT_NULL_RESULT      , nullPointerException()        },
             { "flatMap null result on null"           , JSON_NULL , NULL_RESULT      , nullPointerException(), EQUIVALENT_NULL_RESULT      , nullPointerException()        },
             { "flatMap null result on undefined"      , UNDEFINED , NULL_RESULT      , equalTo(UNDEFINED)    , EQUIVALENT_NULL_RESULT      , equalTo(EQUIVALENT_UNDEFINED) },

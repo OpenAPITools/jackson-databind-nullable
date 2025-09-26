@@ -193,6 +193,9 @@ public class JsonNullable<T> implements Serializable {
      * @since 0.2.8
      */
     public JsonNullable<T> filter( Predicate<T> predicate ) {
+      if (predicate == null) {
+        throw new NullPointerException("filter predicate is null");
+      }
       if (this.isPresent && predicate.test(value)) {
         return this;
       }
@@ -216,6 +219,9 @@ public class JsonNullable<T> implements Serializable {
      * @since 0.2.8
      */
     public <U> JsonNullable<U> map( Function<T, U> mapper) {
+        if (mapper == null) {
+            throw new NullPointerException("mapping function is null");
+        }
         if (this.isPresent) {
             return new JsonNullable<U>(mapper.apply(value), true);
         }
@@ -240,13 +246,16 @@ public class JsonNullable<T> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public <U> JsonNullable<U> flatMap( Function<? super T, ? extends JsonNullable<? extends U>> mapper ) {
+        if (mapper == null) {
+            throw new NullPointerException("mapping function is null");
+        }
         if (!this.isPresent) {
             return (JsonNullable<U>)this;
         }
 
         JsonNullable<U> mapped = (JsonNullable<U>)mapper.apply(value);
         if (mapped == null) {
-            throw new NullPointerException("The mapped value is null");
+            throw new NullPointerException("mapped value is null");
         }
         return mapped;
     }
@@ -267,12 +276,15 @@ public class JsonNullable<T> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public JsonNullable<T> or( Supplier<? extends JsonNullable<? extends T>> supplier ) {
+        if( supplier == null ) {
+            throw new NullPointerException("or supplier is null");
+        }
         if (this.isPresent) {
           return this;
         }
         JsonNullable<T> supplied = (JsonNullable<T>)supplier.get();
         if (supplied == null) {
-            throw new NullPointerException("The supplied value is null");
+            throw new NullPointerException("supplied value is null");
         }
         return supplied;
     }
