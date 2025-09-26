@@ -193,15 +193,15 @@ public class JsonNullable<T> implements Serializable {
      * @since 0.2.8
      */
     public JsonNullable<T> filter( Predicate<T> predicate ) {
-      if (predicate == null) {
-        throw new NullPointerException("filter predicate is null");
-      }
-      if (this.isPresent && predicate.test(value)) {
-        return this;
-      }
-      else {
-        return undefined();
-      }
+        if (predicate == null) {
+            throw new NullPointerException("filter predicate is null");
+        }
+        if (this.isPresent && predicate.test(value)) {
+            return this;
+        }
+        else {
+            return undefined();
+        }
     }
 
     /**
