@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -151,6 +152,37 @@ public class StreamingApiTest {
         };
       });
   }
+
+  interface TriConsumer<A, B, C> {
+    public void accept(A a, B b, C c);
+  }
+
+  static <A, B> Optional<TriConsumer<Optional<Optional<String>>, A, B>> optionalTriConsumer(
+    String methodName, 
+    Class<? super A> argumentAType, 
+    Class<? super B> argumentBType
+  ) {
+    return optionalMethod(methodName, argumentAType, argumentBType)
+      .map(method->{
+        return (optional, argumentA, argumentB)->{
+          try {
+            method.invoke(optional, argumentA, argumentB);
+          } catch ( InvocationTargetException ite ) {
+            if( ite.getCause() instanceof RuntimeException ) {
+              throw (RuntimeException)ite.getCause();
+            } else if ( ite.getCause() instanceof Error ) {
+              throw (Error)ite.getCause();
+            } else {
+              throw new RuntimeException(ite.getCause());
+            }
+          }
+          catch ( IllegalAccessException iae ) {
+            throw new RuntimeException(iae);
+          }
+        };
+      });
+  }
+
 
   static Matcher<Object> nullPointerException() {
     return instanceOf(NullPointerException.class);
@@ -434,55 +466,108 @@ public class StreamingApiTest {
     }
   }
 
+  @RunWith(Parameterized.class)
   public static class IfPresentOrElseTest {
+    static BiConsumer<Consumer<String>, Runnable> v(BiConsumer<Consumer<String>, Runnable> verify) {
+      return verify;
+    }
+    static Function<String, BiConsumer<Consumer<String>, Runnable>> ACTION_CALLED = (value)->(c, r)->{verify(c).accept(value);};
+    static Function<Optional<String>, BiConsumer<Consumer<Optional<String>>, Runnable>> EQUIVALENT_ACTION_CALLED = (value)->(c, r)->{verify(c).accept(value);};
+    static BiConsumer<Consumer<String>, Runnable> UNDEFINED_ACTION_CALLED = (c, r)->{verify(r).run();};
+    static BiConsumer<Consumer<String>, Runnable> NOTHING_CALLED = (c, r)->{};
+    static BiConsumer<Consumer<Optional<String>>, Runnable> EQUIVALENT_NOTHING_CALLED = (c, r)->{};
+    static Boolean ACTION_PROVIDED = true;
+    static Boolean ACTION_NULL = false;
+    static Boolean UNDEFINED_ACTION_PROVIDED = true;
+    static Boolean UNDEFINED_ACTION_NULL = false;
+
+    @Parameters(name="{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+            { "ifPresentOrElse on value with action and undefined action"              , JSON_VALUE, ACTION_PROVIDED, UNDEFINED_ACTION_PROVIDED, ACTION_CALLED.apply(VALUE), nullValue()           , EQUIVALENT_ACTION_CALLED.apply(Optional.of(VALUE)) },
+            { "ifPresentOrElse on null with action and undefined action"               , JSON_NULL , ACTION_PROVIDED, UNDEFINED_ACTION_PROVIDED, ACTION_CALLED.apply(NULL) , nullValue()           , EQUIVALENT_ACTION_CALLED.apply(Optional.empty())   },
+            { "ifPresentOrElse on undefined with action and undefined action"          , UNDEFINED , ACTION_PROVIDED, UNDEFINED_ACTION_PROVIDED, UNDEFINED_ACTION_CALLED   , nullValue()           , UNDEFINED_ACTION_CALLED },
+            { "ifPresentOrElse on value with null action and undefined action"         , JSON_VALUE, ACTION_NULL    , UNDEFINED_ACTION_PROVIDED, NOTHING_CALLED            , nullPointerException(), EQUIVALENT_NOTHING_CALLED },
+            { "ifPresentOrElse on null with null action and undefined action"          , JSON_NULL , ACTION_NULL    , UNDEFINED_ACTION_PROVIDED, NOTHING_CALLED            , nullPointerException(), EQUIVALENT_NOTHING_CALLED },
+            { "ifPresentOrElse on undefined with null action and undefined action"     , UNDEFINED , ACTION_NULL    , UNDEFINED_ACTION_PROVIDED, UNDEFINED_ACTION_CALLED   , nullValue()           , UNDEFINED_ACTION_CALLED },
+            { "ifPresentOrElse on value with action and null undefined action"         , JSON_VALUE, ACTION_PROVIDED, UNDEFINED_ACTION_NULL    , ACTION_CALLED.apply(VALUE), nullValue()           , EQUIVALENT_ACTION_CALLED.apply(Optional.of(VALUE)) },
+            { "ifPresentOrElse on null with action and null undefined action"          , JSON_NULL , ACTION_PROVIDED, UNDEFINED_ACTION_NULL    , ACTION_CALLED.apply(NULL) , nullValue()           , EQUIVALENT_ACTION_CALLED.apply(Optional.empty())   },
+            { "ifPresentOrElse on undefined with action and null undefined action"     , UNDEFINED , ACTION_PROVIDED, UNDEFINED_ACTION_NULL    , NOTHING_CALLED            , nullPointerException(), EQUIVALENT_NOTHING_CALLED },
+            { "ifPresentOrElse on value with null action and null undefined action"    , JSON_VALUE, ACTION_NULL    , UNDEFINED_ACTION_NULL    , NOTHING_CALLED            , nullPointerException(), EQUIVALENT_NOTHING_CALLED },
+            { "ifPresentOrElse on null with null action and null undefined action"     , JSON_NULL , ACTION_NULL    , UNDEFINED_ACTION_NULL    , NOTHING_CALLED            , nullPointerException(), EQUIVALENT_NOTHING_CALLED },
+            { "ifPresentOrElse on undefined null with action and null undefined action", UNDEFINED , ACTION_NULL    , UNDEFINED_ACTION_NULL    , NOTHING_CALLED            , nullPointerException(), EQUIVALENT_NOTHING_CALLED },
+        });
+    }
     @SuppressWarnings("unchecked")
     Consumer<String> whenPresent = mock(Consumer.class);
     Runnable whenNotPresent = mock(Runnable.class);
 
+    @SuppressWarnings("rawtypes")
+    TriConsumer<Optional<Optional<String>>, Consumer, Runnable> equivalentCall =
+      optionalTriConsumer("ifPresentOrElse", Consumer.class, Runnable.class).orElse(null);
+    @SuppressWarnings("unchecked")
+    Consumer<Optional<String>> equivalentWhenPresent = mock(Consumer.class);
+
+    @Parameter(0)
+    public String name;
+
+    @Parameter(1)
+    public JsonNullable<String> value;
+
+    @Parameter(2)
+    public Boolean actionProvided;
+
+    @Parameter(3)
+    public Boolean undefinedActionProvided;
+
+    @Parameter(4)
+    public BiConsumer<Consumer<String>, Runnable> verify;
+
+    @Parameter(5)
+    public Matcher<Object> exceptionMatcher;
+
+    @Parameter(6)
+    public BiConsumer<Consumer<Optional<String>>, Runnable> equivalentVerify;
+
     @Before
     public void resetMocks() {
-      Mockito.reset(whenPresent, whenNotPresent);
+      Mockito.reset(whenPresent, whenNotPresent, equivalentWhenPresent);
     }
 
     @Test
-    public void whenValuePresent() {
-      JSON_VALUE.ifPresentOrElse(whenPresent, whenNotPresent);
-
-      verify(whenPresent).accept(VALUE);
-      verifyNoMoreInteractions(whenPresent, whenNotPresent);
-    }
-
-    @Test
-    public void whenNullPresent() {
-      JSON_NULL.ifPresentOrElse(whenPresent, whenNotPresent);
-
-      verify(whenPresent).accept(NULL);
-      verifyNoMoreInteractions(whenPresent, whenNotPresent);
-    }
-
-    @Test
-    public void whenUndefined() {
-      UNDEFINED.ifPresentOrElse(whenPresent, whenNotPresent);
-
-      verify(whenNotPresent).run();
-      verifyNoMoreInteractions(whenPresent, whenNotPresent);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void whenPresentAndActionNull() {
+    public void call() {
+      Throwable thrown = null;
+      Consumer<String> action = actionProvided?whenPresent:null;
+      Runnable undefinedAction = undefinedActionProvided?whenNotPresent:null;
       try {
-        JSON_VALUE.ifPresentOrElse(null, whenNotPresent);
-      } finally {
+        value.ifPresentOrElse(action, undefinedAction);
+      } catch( Throwable t) {
+        thrown = t;
+      }
+      finally {
+        verify.accept(whenPresent, whenNotPresent);
+        exceptionMatcher.matches(thrown);
         verifyNoMoreInteractions(whenPresent, whenNotPresent);
       }
     }
 
-    @Test(expected = NullPointerException.class)
-    public void whenUndefinedAndActionNull() {
+    @Test
+    public void equivalentCall() {
+      assumeNotNull(equivalentCall);
+      Optional<Optional<String>> equivalentValue = equivalentOptional(value);
+
+      Throwable thrown = null;
+      Consumer<Optional<String>> action = actionProvided?equivalentWhenPresent:null;
+      Runnable undefinedAction = undefinedActionProvided?whenNotPresent:null;
       try {
-        UNDEFINED.ifPresentOrElse(whenPresent, null);
-      } finally {
-        verifyNoMoreInteractions(whenPresent, whenNotPresent);
+        equivalentCall.accept(equivalentValue, action, undefinedAction);
+      } catch( Throwable t) {
+        thrown = t;
+      }
+      finally {
+        equivalentVerify.accept(equivalentWhenPresent, whenNotPresent);
+        exceptionMatcher.matches(thrown);
+        verifyNoMoreInteractions(equivalentWhenPresent, whenNotPresent);
       }
     }
   }
