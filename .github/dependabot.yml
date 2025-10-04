@@ -13,6 +13,12 @@ updates:
       # Ignore semver-major updates until Java 17+ is used for builds.
       - dependency-name: "org.hibernate.validator:hibernate-validator"
         update-types: ["version-update:semver-major"]
+      # Ignore semver-major updates until Java 17+ is used for builds.
+      - dependency-name: "org.mockito:mockito-core"
+        update-types: ["version-update:semver-major"]
+      # Ignore semver-major updates until Java 17+ is used for builds.
+      - dependency-name: "org.junit:junit-bom"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
