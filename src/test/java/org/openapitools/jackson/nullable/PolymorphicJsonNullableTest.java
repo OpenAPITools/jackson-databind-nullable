@@ -2,7 +2,7 @@ package org.openapitools.jackson.nullable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +25,7 @@ class PolymorphicJsonNullableTest extends ModuleTestBase {
 
     // [datatype-jdk8#14]
     @Test
-    void testPolymorphic14() throws Exception {
+    void testPolymorphic14() {
         final Container dto = new Container();
         dto.contained = JsonNullable.<Contained>of(new ContainedImpl());
 

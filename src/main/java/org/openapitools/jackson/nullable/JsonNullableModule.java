@@ -1,10 +1,10 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.json.PackageVersion;
-import com.fasterxml.jackson.databind.Module;
+import tools.jackson.core.Version;
+import tools.jackson.core.json.PackageVersion;
+import tools.jackson.databind.JacksonModule;
 
-public class JsonNullableModule extends Module {
+public class JsonNullableModule extends JacksonModule {
 
     private final String NAME = "JsonNullableModule";
 
@@ -14,7 +14,7 @@ public class JsonNullableModule extends Module {
         context.addDeserializers(new JsonNullableDeserializers());
         // Modify type info for JsonNullable
         context.addTypeModifier(new JsonNullableTypeModifier());
-        context.addBeanSerializerModifier(new JsonNullableBeanSerializerModifier());
+        context.addSerializerModifier(new JsonNullableValueSerializerModifier());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +10,7 @@ class JsonNullJacksonServiceLoadingTest {
 
     @Test
     void testJacksonJsonNullableModuleServiceLoading() {
-        String foundModuleName = ObjectMapper.findModules().get(0).getModuleName();
+        String foundModuleName = MapperBuilder.findModules().get(0).getModuleName();
         assertEquals(new JsonNullableModule().getModuleName(), foundModuleName);
     }
 }

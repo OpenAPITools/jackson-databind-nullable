@@ -1,10 +1,10 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.PropertyName;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.util.NameTransformer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.PropertyName;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.BeanPropertyWriter;
+import tools.jackson.databind.util.NameTransformer;
 
 public class JsonNullableBeanPropertyWriter extends BeanPropertyWriter
 {
@@ -29,13 +29,13 @@ public class JsonNullableBeanPropertyWriter extends BeanPropertyWriter
     }
 
     @Override
-    public void serializeAsField(Object bean, JsonGenerator jgen, SerializerProvider prov) throws Exception
+    public void serializeAsProperty(Object bean, JsonGenerator jgen, SerializationContext ctxt) throws Exception
     {
         Object value = get(bean);
         if (JsonNullable.undefined().equals(value) || (_nullSerializer == null && value == null)) {
             return;
         }
-        super.serializeAsField(bean, jgen, prov);
+        super.serializeAsProperty(bean, jgen, ctxt);
     }
 
 }
