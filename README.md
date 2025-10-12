@@ -6,11 +6,11 @@
 
 This module provides a `JsonNullable` wrapper class and a Jackson module to serialize/deserialize it.
 The `JsonNullable` wrapper shall be used to wrap Java bean fields for which it is important to distinguish between an explicit `"null"` and the field not being present.
-A typical usage is when implementing [Json Merge Patch](https://tools.ietf.org/html/rfc7386) where an explicit `"null"`has the meaning "set this field to null / remove this field" whereas a non-present field has the meaning "don't change the value of this field".
+A typical usage is when implementing [Json Merge Patch](https://tools.ietf.org/html/rfc7386) where an explicit `"null"` has the meaning "set this field to null / remove this field" whereas a non-present field has the meaning "don't change the value of this field".
 
 The module comes with an integrated `ValueExtractor` that automatically unwraps the contained value of the `JsonNullable` if used together with javax.validation Bean validation (JSR 380). 
 
-Note : a lot of people use `Optional` to bring this behavior.
+Note: a lot of people use `Optional` to bring this behavior.
 Although it kinda works, it's not a good idea because:
 * Beans shouldn't have `Optional` fields.
   `Optional` was designed to be used only as method return value.
@@ -84,7 +84,7 @@ The `ValueExtractor` is registered automatically via Java Service loader mechani
 Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 Pet myPet = new Pet().name(JsonNullable.of("My Pet's really long name"));
 Set<ConstraintViolation<Pet>> validationResult = validator.validate(myPet);
-assertTrue(1, validationResult.size());
+assertEquals(1, validationResult.size());
 ```
 
 ## Limitations

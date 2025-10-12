@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 // TODO: fix JsonNullable in constructor annotated by JsonCreator
-@Disabled("JsonNullable in a constructor is dederialized to JsonNullable[null] instead of JsonNullable.undefined")
+@Disabled("JsonNullable in a constructor is deserialized to JsonNullable[null] instead of JsonNullable.undefined")
 class CreatorTest extends ModuleTestBase
 {
     static class CreatorWithJsonNullableStrings

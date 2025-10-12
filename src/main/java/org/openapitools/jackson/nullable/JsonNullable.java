@@ -209,7 +209,7 @@ public class JsonNullable<T> implements Serializable {
     /**
      * If a value is present, returns a JsonNullable describing the result of
      * applying the given mapping function to the value, otherwise returns an
-     * undeined JsonNullable.
+     * undefined JsonNullable.
      *
      * @param <U> the type of the value returned from the mapping function
      * @param mapper the mapping function to apply to a value, if present

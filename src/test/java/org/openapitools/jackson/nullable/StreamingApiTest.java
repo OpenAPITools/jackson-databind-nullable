@@ -658,7 +658,7 @@ public class StreamingApiTest {
     }
 
     //
-    // These static methods form a two-way coorespondance between JsonNullable<String> and
+    // These static methods form a two-way correspondence between JsonNullable<String> and
     // Optional<Optional<String>>
     //
     static Optional<Optional<String>> nullableToOptional(JsonNullable<String> value) {
