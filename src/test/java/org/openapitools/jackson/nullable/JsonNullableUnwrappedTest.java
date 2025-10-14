@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// TODO: Make JsonNulllable work with JsonUnwrapped
+// TODO: Make JsonNullable work with JsonUnwrapped
 @Disabled("JsonNullable currently doesnt work with JsonUnwrapped")
 class JsonNullableUnwrappedTest extends ModuleTestBase
 {
