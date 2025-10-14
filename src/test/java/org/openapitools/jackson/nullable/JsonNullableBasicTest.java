@@ -52,7 +52,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     public static interface Contained { }
 
     public static class ContainedImpl implements Contained { }
-    
+
     /*
     /**********************************************************
     /* Test methods
@@ -157,7 +157,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     void testSerOptDefault() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = JsonNullable.undefined();
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.ALWAYS).writeValueAsString(data);
         assertEquals("{}", value);
     }
@@ -166,7 +166,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     void testSerOptNull() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_NULL).writeValueAsString(data);
         assertEquals("{}", value);
     }
@@ -175,7 +175,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     void testSerOptNullNulled() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = JsonNullable.of(null);
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_NULL).writeValueAsString(data);
         assertEquals("{\"myString\":null}", value);
     }
@@ -186,18 +186,18 @@ class JsonNullableBasicTest extends ModuleTestBase {
         data.myString = JsonNullable.undefined();
 
         ObjectMapper mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
 
         assertEquals("{}", mapper.writeValueAsString(data));
 
         // but do exclude with NON_EMPTY
         mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
         assertEquals("{}", mapper.writeValueAsString(data));
 
         // and with new (2.6) NON_ABSENT
         mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
         assertEquals("{}", mapper.writeValueAsString(data));
     }
 
@@ -205,7 +205,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     void testSerOptAbsentNull() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = JsonNullable.of(null);
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_ABSENT).writeValueAsString(data);
         assertEquals("{\"myString\":null}", value);
     }
@@ -214,7 +214,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     void testSerOptNonEmpty() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_EMPTY).writeValueAsString(data);
         assertEquals("{}", value);
     }
@@ -224,7 +224,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
         final ObjectMapper objectMapper = mapperWithModule();
         // ENABLE TYPING
         objectMapper
-                .enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
+                .activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
 
         final JsonNullableData myData = new JsonNullableData();
         myData.myString = JsonNullable.of("abc");

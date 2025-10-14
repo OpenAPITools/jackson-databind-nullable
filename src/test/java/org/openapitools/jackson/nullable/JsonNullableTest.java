@@ -194,7 +194,7 @@ class JsonNullableTest extends ModuleTestBase
     @Test
     void testExcludeIfJsonNullableAbsent() throws Exception {
         ObjectMapper mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
         assertEquals(aposToQuotes("{'value':'foo'}"),
                 mapper.writeValueAsString(new JsonNullableStringBean("foo")));
         // absent is not strictly null so
@@ -203,7 +203,7 @@ class JsonNullableTest extends ModuleTestBase
 
         // however:
         mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
         assertEquals(aposToQuotes("{'value':'foo'}"),
                 mapper.writeValueAsString(new JsonNullableStringBean("foo")));
         assertEquals(aposToQuotes("{\"value\":null}"),
@@ -241,7 +241,7 @@ class JsonNullableTest extends ModuleTestBase
     @Test
     void testCustomSerializerIfJsonNullableAbsent() throws Exception {
         ObjectMapper mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
         assertEquals(aposToQuotes("{'value':'FOO'}"),
                 mapper.writeValueAsString(new CaseChangingStringWrapper("foo")));
         // absent is not strictly null so
@@ -252,7 +252,7 @@ class JsonNullableTest extends ModuleTestBase
 
         // however:
         mapper = mapperWithModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
         assertEquals(aposToQuotes("{'value':'FOO'}"),
                 mapper.writeValueAsString(new CaseChangingStringWrapper("foo")));
         assertEquals(aposToQuotes("{'value':null}"),
