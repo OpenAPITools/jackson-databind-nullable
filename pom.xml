@@ -143,7 +143,8 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>compile-java-8</id>
+                        <!-- Named specifically to override the default compile execution -->
+                        <id>default-compile</id>
                         <goals>
                             <goal>compile</goal>
                         </goals>
