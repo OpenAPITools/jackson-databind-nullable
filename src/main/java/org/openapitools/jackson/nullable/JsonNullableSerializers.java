@@ -1,19 +1,21 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import com.fasterxml.jackson.databind.ser.Serializers;
-import com.fasterxml.jackson.databind.type.ReferenceType;
+
+import com.fasterxml.jackson.annotation.JsonFormat.Value;
+
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.BeanDescription.Supplier;
+import tools.jackson.databind.jsontype.TypeSerializer;
+import tools.jackson.databind.ser.Serializers;
+import tools.jackson.databind.type.ReferenceType;
 
 public class JsonNullableSerializers extends Serializers.Base {
-
     @Override
-    public JsonSerializer<?> findReferenceSerializer(SerializationConfig config,
-                                                     ReferenceType refType, BeanDescription beanDesc,
-                                                     TypeSerializer contentTypeSerializer, JsonSerializer<Object> contentValueSerializer) {
+    public ValueSerializer<?> findReferenceSerializer(SerializationConfig config,
+                                                      ReferenceType refType, Supplier beanDescRef, Value formatOverrides,
+                                                      TypeSerializer contentTypeSerializer, ValueSerializer<Object> contentValueSerializer) {
         if (JsonNullable.class.isAssignableFrom(refType.getRawClass())) {
             boolean staticTyping = (contentTypeSerializer == null)
                     && config.isEnabled(MapperFeature.USE_STATIC_TYPING);

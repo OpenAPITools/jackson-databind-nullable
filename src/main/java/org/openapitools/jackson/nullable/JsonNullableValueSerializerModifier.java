@@ -1,18 +1,18 @@
 package org.openapitools.jackson.nullable;
 
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.BeanDescription.Supplier;
+import tools.jackson.databind.ser.BeanPropertyWriter;
+import tools.jackson.databind.ser.ValueSerializerModifier;
 
 import java.util.List;
 
-public class JsonNullableBeanSerializerModifier  extends BeanSerializerModifier
+public class JsonNullableValueSerializerModifier  extends ValueSerializerModifier
 {
     @Override
     public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
-                                                     BeanDescription beanDesc,
+                                                     Supplier beanDesc,
                                                      List<BeanPropertyWriter> beanProperties)
     {
         for (int i = 0; i < beanProperties.size(); ++i) {

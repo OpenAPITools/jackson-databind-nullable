@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -73,7 +73,7 @@ class TestJsonNullableWithPolymorphic extends ModuleTestBase {
     final ObjectMapper MAPPER = mapperWithModule();
 
     @Test
-    void testJsonNullableMapsFoo() throws Exception {
+    void testJsonNullableMapsFoo() {
 
         Map<String, Object> foo = new LinkedHashMap<String, Object>();
         Map<String, Object> loop = new LinkedHashMap<String, Object>();
@@ -87,7 +87,7 @@ class TestJsonNullableWithPolymorphic extends ModuleTestBase {
     }
 
     @Test
-    void testJsonNullableMapsBar() throws Exception {
+    void testJsonNullableMapsBar() {
 
         Map<String, Object> bar = new LinkedHashMap<String, Object>();
         Map<String, Object> loop = new LinkedHashMap<String, Object>();
@@ -101,7 +101,7 @@ class TestJsonNullableWithPolymorphic extends ModuleTestBase {
     }
 
     @Test
-    void testJsonNullableMapsBaz() throws Exception {
+    void testJsonNullableMapsBaz() {
         Map<String, Object> baz = new LinkedHashMap<String, Object>();
         Map<String, Object> loop = new LinkedHashMap<String, Object>();
         loop.put("type", "Baz");
@@ -114,7 +114,7 @@ class TestJsonNullableWithPolymorphic extends ModuleTestBase {
     }
 
     @Test
-    void testJsonNullableWithTypeAnnotation13() throws Exception {
+    void testJsonNullableWithTypeAnnotation13() {
         AbstractJsonNullable result = MAPPER.readValue("{\"value\" : 5}",
                 AbstractJsonNullable.class);
         assertNotNull(result);
@@ -124,7 +124,7 @@ class TestJsonNullableWithPolymorphic extends ModuleTestBase {
         assertEquals(Integer.valueOf(5), ob);
     }
 
-    private void _test(ObjectMapper m, Map<String, ?> map) throws Exception {
+    private void _test(ObjectMapper m, Map<String, ?> map) {
         String json = m.writeValueAsString(map);
 
         ContainerA objA = m.readValue(json, ContainerA.class);
