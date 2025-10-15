@@ -100,7 +100,7 @@ final class JsonNullableSimpleTest {
 
     @Test
     void serializeNonNull() throws JsonProcessingException {
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(null)));
         assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));
@@ -109,7 +109,7 @@ final class JsonNullableSimpleTest {
 
     @Test
     void serializeNonAbsent() throws JsonProcessingException {
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+        mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
         assertEquals("{}", mapper.writeValueAsString(new Pet().name(null)));
         assertEquals("{\"name\":null}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));

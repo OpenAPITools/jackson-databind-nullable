@@ -60,7 +60,7 @@ class JsonNullableInclusionTest extends ModuleTestBase
     void testSerOptNonEmpty() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_EMPTY).writeValueAsString(data);
         assertEquals("{}", value);
     }
@@ -69,7 +69,7 @@ class JsonNullableInclusionTest extends ModuleTestBase
     void testSerOptNonDefault() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_DEFAULT).writeValueAsString(data);
         assertEquals("{}", value);
     }
@@ -78,7 +78,7 @@ class JsonNullableInclusionTest extends ModuleTestBase
     void testSerOptNonAbsent() throws Exception {
         JsonNullableData data = new JsonNullableData();
         data.myString = null;
-        String value = mapperWithModule().setSerializationInclusion(
+        String value = mapperWithModule().setDefaultPropertyInclusion(
                 JsonInclude.Include.NON_ABSENT).writeValueAsString(data);
         assertEquals("{}", value);
     }
