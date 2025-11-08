@@ -37,4 +37,4 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build and Test
-        run: mvn clean verify -p integration-test
+        run: ./mvnw clean verify -P integration-test
