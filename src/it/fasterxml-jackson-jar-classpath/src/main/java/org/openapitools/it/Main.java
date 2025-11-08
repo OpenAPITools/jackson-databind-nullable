@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.openapitools.jackson.nullable.JsonNullableJakartaValueExtractor;
+import jakarta.validation.valueextraction.ValueExtractor;
+
+import java.util.ServiceLoader;
 
 public class Main {
 
@@ -22,11 +25,24 @@ public class Main {
             System.exit(1);
         }
 
+        tryLoadingJakartaValidation();
         System.out.println("Success");
     }
 
     public static final class JsonNullableData {
         public JsonNullable<String> myString;
+    }
+
+    private static void tryLoadingJakartaValidation() {
+        ServiceLoader<ValueExtractor> loaded = ServiceLoader.load(ValueExtractor.class);
+        for (ValueExtractor ve : loaded) {
+            if (ve instanceof JsonNullableJakartaValueExtractor) {
+                System.out.println("Successfully loaded JsonNullableJakartaValueExtractor via ServiceLoader");
+                return;
+            }
+        }
+        System.out.println("Failed to load JsonNullableJakartaValueExtractor via ServiceLoader");
+        System.exit(1);
     }
 
 }

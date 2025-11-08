@@ -20,6 +20,11 @@
             <artifactId>jackson-databind-nullable</artifactId>
             <version>@project.version@</version>
         </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -39,14 +44,10 @@
                     <launcher>
                         main=org.openapitools.it/org.openapitools.it.Main
                     </launcher>
-                    <noHeaderFiles>true</noHeaderFiles>
-                    <noManPages>true</noManPages>
-                    <stripDebug>true</stripDebug>
-                    <compress>zip-1</compress>
                     <verbose>true</verbose>
                 </configuration>
             </plugin>
-            <plugin> <!-- FIXME call with invoker plugin -->
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.2</version>

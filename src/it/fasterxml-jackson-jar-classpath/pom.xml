@@ -69,7 +69,7 @@
                         </goals>
                         <configuration>
                             <executable>java</executable>
-                            <commandlineArgs>--module-path ${project.build.directory}/test-1.0-SNAPSHOT.jar${path.separator}${project.build.directory}/lib --module org.openapitools.it/org.openapitools.it.Main</commandlineArgs>
+                            <commandlineArgs>--class-path ${project.build.directory}/test-1.0-SNAPSHOT.jar${path.separator}${project.build.directory}/lib/* org.openapitools.it.Main</commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>
