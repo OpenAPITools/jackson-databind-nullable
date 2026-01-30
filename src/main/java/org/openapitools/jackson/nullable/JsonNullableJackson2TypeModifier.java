@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.type.TypeModifier;
 
 import java.lang.reflect.Type;
 
-public class JsonNullableTypeModifier extends TypeModifier {
+public class JsonNullableJackson2TypeModifier extends TypeModifier {
 
     @Override
     public JavaType modifyType(JavaType type, Type jdkType, TypeBindings bindings, TypeFactory typeFactory)
