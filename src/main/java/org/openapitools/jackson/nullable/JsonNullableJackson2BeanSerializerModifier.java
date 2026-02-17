@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 
 import java.util.List;
 
-public class JsonNullableBeanSerializerModifier  extends BeanSerializerModifier
+public class JsonNullableJackson2BeanSerializerModifier extends BeanSerializerModifier
 {
     @Override
     public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
@@ -19,7 +19,7 @@ public class JsonNullableBeanSerializerModifier  extends BeanSerializerModifier
             final BeanPropertyWriter writer = beanProperties.get(i);
             JavaType type = writer.getType();
             if (type.isTypeOrSubTypeOf(JsonNullable.class)) {
-                beanProperties.set(i, new JsonNullableBeanPropertyWriter(writer));
+                beanProperties.set(i, new JsonNullableJackson2BeanPropertyWriter(writer));
             }
         }
         return beanProperties;

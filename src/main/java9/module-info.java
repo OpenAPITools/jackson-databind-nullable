@@ -1,3 +1,5 @@
+import org.openapitools.jackson.nullable.JsonNullableModule;
+
 module org.openapitools.jackson.nullable {
     requires com.fasterxml.jackson.databind;
     requires static jakarta.validation;
