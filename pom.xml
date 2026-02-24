@@ -1,10 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-base</artifactId>
-        <version>2.20.1</version>
-    </parent>
+
     <groupId>org.openapitools</groupId>
     <artifactId>jackson-databind-nullable</artifactId>
     <packaging>jar</packaging>
@@ -17,6 +13,7 @@
         <connection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</connection>
         <developerConnection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</developerConnection>
         <url>https://github.com/OpenAPITools/jackson-databind-nullable</url>
+        <!-- TODO: This needs to be updated with each release. -->
         <tag>jackson-databind-nullable-0.2.5</tag>
     </scm>
     <licenses>
@@ -26,12 +23,31 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <developers>
+        <developer>
+            <!-- Original project author -->
+            <id>cbornet</id>
+        </developer>
+    </developers>
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/OpenAPITools/jackson-databind-nullable/issues</url>
+    </issueManagement>
+    <organization>
+        <name>OpenAPI Tools</name>
+        <url>https://openapitools.org/</url>
+    </organization>
 
     <properties>
-        <!-- Generate PackageVersion.java into this directory. -->
-        <packageVersion.dir>org/openapitools/jackson/nullable</packageVersion.dir>
-        <packageVersion.package>${project.groupId}.jackson.nullable</packageVersion.package>
         <java.version>8</java.version>
+
+        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
+        <!-- TODO: Update on build. Used for reproducible builds. -->
+        <project.build.outputTimestamp>2025-10-30T23:03:53Z</project.build.outputTimestamp>
 
         <!-- region Dependency Versions -->
         <!-- Validator 8+ requires Java 11, Validator 9+ requires Java 17. -->
@@ -45,13 +61,22 @@
         <!-- endregion -->
 
         <!-- region Plugin Versions -->
+        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
         <central-publishing-maven-plugin.version>0.9.0</central-publishing-maven-plugin.version>
+        <maven-bundle-plugin.version>5.1.9</maven-bundle-plugin.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+        <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-replacer-plugin.version>1.5.3</maven-replacer-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-site-plugin.version>4.0.0-M16</maven-site-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
         <!-- endregion -->
     </properties>
 
@@ -128,25 +153,114 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <!-- Adds the LICENSE file to the META-INF folder. -->
+                        <id>add-license</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <targetPath>META-INF</targetPath>
+                                    <includes>
+                                        <include>LICENSE</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!--
+                            Add the generated-sources folder as a Maven source.
+                            The `PackageVersion.java` file is generated into this location.
+                        -->
+                        <id>add-generated-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/target/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>replacer</artifactId>
                 <version>${maven-replacer-plugin.version}</version>
                 <executions>
                     <execution>
+                        <!-- Generate the `PackageVersion.java` file based on the template with variables replaced. -->
                         <id>process-packageVersion</id>
                         <phase>generate-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <file>
+                                ${project.basedir}/src/main/java/org/openapitools/jackson/nullable/PackageVersion.java.in
+                            </file>
+                            <outputFile>
+                                ${project.basedir}/target/generated-sources/org/openapitools/jackson/nullable/PackageVersion.java
+                            </outputFile>
+                            <replacements>
+                                <replacement>
+                                    <token>@package@</token>
+                                    <value>org.openapitools.jackson.nullable</value>
+                                </replacement>
+                                <replacement>
+                                    <token>@projectversion@</token>
+                                    <value>${project.version}</value>
+                                </replacement>
+                                <replacement>
+                                    <token>@projectgroupid@</token>
+                                    <value>${project.groupId}</value>
+                                </replacement>
+                                <replacement>
+                                    <token>@projectartifactid@</token>
+                                    <value>${project.artifactId}</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <!-- Add full debug information when compiling. -->
+                    <debug>true</debug>
+                    <debuglevel>lines,source,vars</debuglevel>
+                </configuration>
                 <executions>
                     <execution>
                         <!-- Named specifically to override the default compile execution -->
                         <id>default-compile</id>
                         <goals>
                             <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>${java.version}</release>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Named specifically to override the default testCompile execution -->
+                        <id>default-testCompile</id>
+                        <goals>
+                            <goal>testCompile</goal>
                         </goals>
                         <configuration>
                             <release>${java.version}</release>
@@ -169,9 +283,97 @@
                 </executions>
             </plugin>
             <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[1.8,)</version>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.6,)</version>
+                                </requireMavenVersion>
+                                <requirePluginVersions>
+                                    <banLatest>true</banLatest>
+                                    <banRelease>true</banRelease>
+                                    <banSnapshots>true</banSnapshots>
+                                    <phases>clean,deploy,site</phases>
+                                </requirePluginVersions>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                        <configuration>
+                            <instructions>
+                                <!-- Stop the JAVA_1_n_HOME variables from being treated as headers by Bnd -->
+                                <_removeheaders>
+                                    Include-Resource,JAVA_1_3_HOME,JAVA_1_4_HOME,JAVA_1_5_HOME,JAVA_1_6_HOME,JAVA_1_7_HOME
+                                </_removeheaders>
+                                <_versionpolicy>${range;[===,=+);${@}}</_versionpolicy>
+                                <Bundle-Name>${project.name}</Bundle-Name>
+                                <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                                <Bundle-Description>${project.description}</Bundle-Description>
+                                <Export-Package>${project.groupId}.*;version=${project.version}</Export-Package>
+                                <Import-Package>*</Import-Package>
+                                <Private-Package />
+                                <Include-Resource>{maven-resources}</Include-Resource>
+                                <Bundle-DocURL>${project.url}</Bundle-DocURL>
+                                <X-Compile-Source-JDK>${java.version}</X-Compile-Source-JDK>
+                                <X-Compile-Target-JDK>${java.version}</X-Compile-Target-JDK>
+                                <Implementation-Title>${project.name}</Implementation-Title>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                                <Specification-Title>${project.name}</Specification-Title>
+                                <Specification-Version>${project.version}</Specification-Version>
+                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                            </instructions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin.version}</version>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
                         <disable>false</disable>
@@ -192,18 +394,6 @@
                         <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
                         <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
                     </statelessTestsetInfoReporter>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin.version}</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
-                        </manifestEntries>
-                    </archive>
                 </configuration>
             </plugin>
             <plugin>
@@ -241,10 +431,46 @@
                     <additionalOptions>
                         <additionalOption>-Xdoclint:none</additionalOption>
                     </additionalOptions>
+                    <links>
+                        <link>http://docs.oracle.com/javase/8/docs/api/</link>
+                    </links>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${maven-clean-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>${maven-install-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>central-snapshots</id>
+            <name>Sonatype Central Portal (snapshots)</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots</url>
+        </repository>
+    </repositories>
     <profiles>
         <profile>
             <id>ossrh-publish</id>
@@ -294,6 +520,7 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <checksums>required</checksums>
+                            <deploymentName>Deployment-${project.artifactId}</deploymentName>
                         </configuration>
                     </plugin>
                 </plugins>
