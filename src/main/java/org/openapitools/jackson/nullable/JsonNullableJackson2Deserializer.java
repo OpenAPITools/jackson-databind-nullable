@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.type.ReferenceType;
 
 import java.io.IOException;
 
-public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNullable<Object>> {
+public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<JsonNullable<Object>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,8 +25,8 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     /* Life-cycle
     /**********************************************************
      */
-    public JsonNullableDeserializer(JavaType fullType, ValueInstantiator inst,
-                                    TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
+    public JsonNullableJackson2Deserializer(JavaType fullType, ValueInstantiator inst,
+                                            TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
         super(fullType, inst, typeDeser, deser);
         if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
             this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
@@ -52,8 +52,8 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     }
 
     @Override
-    public JsonNullableDeserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
-        return new JsonNullableDeserializer(_fullType, _valueInstantiator,
+    public JsonNullableJackson2Deserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
+        return new JsonNullableJackson2Deserializer(_fullType, _valueInstantiator,
                 typeDeser, valueDeser);
     }
 

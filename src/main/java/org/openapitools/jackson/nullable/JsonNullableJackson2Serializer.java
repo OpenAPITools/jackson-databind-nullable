@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 
-public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable<?>> {
+public class JsonNullableJackson2Serializer extends ReferenceTypeSerializer<JsonNullable<?>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -17,14 +17,14 @@ public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable
     /**********************************************************
      */
 
-    protected JsonNullableSerializer(ReferenceType fullType, boolean staticTyping,
-                                     TypeSerializer vts, JsonSerializer<Object> ser) {
+    protected JsonNullableJackson2Serializer(ReferenceType fullType, boolean staticTyping,
+                                             TypeSerializer vts, JsonSerializer<Object> ser) {
         super(fullType, staticTyping, vts, ser);
     }
 
-    protected JsonNullableSerializer(JsonNullableSerializer base, BeanProperty property,
-                                     TypeSerializer vts, JsonSerializer<?> valueSer, NameTransformer unwrapper,
-                                     Object suppressableValue)
+    protected JsonNullableJackson2Serializer(JsonNullableJackson2Serializer base, BeanProperty property,
+                                             TypeSerializer vts, JsonSerializer<?> valueSer, NameTransformer unwrapper,
+                                             Object suppressableValue)
     {
         // Keep suppressNulls to false to always serialize JsonNullable[null]
         super(base, property, vts, valueSer, unwrapper,
@@ -36,7 +36,7 @@ public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable
                                                                     TypeSerializer vts, JsonSerializer<?> valueSer,
                                                                     NameTransformer unwrapper)
     {
-        return new JsonNullableSerializer(this, prop, vts, valueSer, unwrapper,
+        return new JsonNullableJackson2Serializer(this, prop, vts, valueSer, unwrapper,
                 _suppressableValue);
     }
 
@@ -44,7 +44,7 @@ public class JsonNullableSerializer extends ReferenceTypeSerializer<JsonNullable
     public ReferenceTypeSerializer<JsonNullable<?>> withContentInclusion(Object suppressableValue,
                                                                          boolean suppressNulls)
     {
-        return new JsonNullableSerializer(this, _property, _valueTypeSerializer,
+        return new JsonNullableJackson2Serializer(this, _property, _valueTypeSerializer,
                 _valueSerializer, _unwrapper,
                 suppressableValue);
     }

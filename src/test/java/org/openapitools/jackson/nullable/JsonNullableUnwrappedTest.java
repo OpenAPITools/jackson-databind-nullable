@@ -53,7 +53,7 @@ class JsonNullableUnwrappedTest extends ModuleTestBase
 
     @Test
     void testUntypedWithJsonNullablesNotNulls() throws Exception {
-        final ObjectMapper mapper = mapperWithModule();
+        final ObjectMapper mapper = mapperWithJackson2Module();
         String jsonExp = aposToQuotes("{'XX.name':'Bob'}");
         String jsonAct = mapper.writeValueAsString(new JsonNullableParent());
         assertEquals(jsonExp, jsonAct);
@@ -62,7 +62,7 @@ class JsonNullableUnwrappedTest extends ModuleTestBase
     // for [datatype-jdk8#20]
     @Test
     void testShouldSerializeUnwrappedJsonNullable() throws Exception {
-        final ObjectMapper mapper = mapperWithModule();
+        final ObjectMapper mapper = mapperWithJackson2Module();
 
         assertEquals("{\"id\":\"foo\"}",
                 mapper.writeValueAsString(new Bean("foo", JsonNullable.<Bean2>undefined())));
@@ -71,7 +71,7 @@ class JsonNullableUnwrappedTest extends ModuleTestBase
     // for [datatype-jdk8#26]
     @Test
     void testPropogatePrefixToSchema() throws Exception {
-        final ObjectMapper mapper = mapperWithModule();
+        final ObjectMapper mapper = mapperWithJackson2Module();
 
         final AtomicReference<String> propertyName = new AtomicReference<String>();
         mapper.acceptJsonFormatVisitor(JsonNullableParent.class, new JsonFormatVisitorWrapper.Base(new DefaultSerializerProvider.Impl()) {
