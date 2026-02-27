@@ -60,6 +60,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
      */
 
     private final ObjectMapper MAPPER = mapperWithModule();
+    private final ObjectMapper MAPPER_BLANK_TO_NULL = mapperWithModule(new JsonNullableModule().mapBlankStringToNull(true));
 
     @Test
     void testJsonNullableTypeResolution() {
@@ -270,9 +271,16 @@ class JsonNullableBasicTest extends ModuleTestBase {
     }
 
     @Test
-    void testDeserNull() throws Exception {
+    void testDeserEmptyStringForNonStringType() throws Exception {
         JsonNullable<?> value = MAPPER.readValue("\"\"", new TypeReference<JsonNullable<Integer>>() {});
         assertFalse(value.isPresent());
+    }
+
+    @Test
+    void testDeserEmptyStringForNonStringTypeWithMapBlankStringToNull() throws Exception {
+        JsonNullable<?> value = MAPPER_BLANK_TO_NULL.readValue("\"\"", new TypeReference<JsonNullable<Integer>>() {});
+        assertTrue(value.isPresent());
+        assertNull(value.get());
     }
 
     @Test

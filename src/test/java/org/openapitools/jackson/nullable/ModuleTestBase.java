@@ -21,6 +21,13 @@ abstract class ModuleTestBase
         return mapper;
     }
 
+    protected ObjectMapper mapperWithModule(JsonNullableModule module)
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(module);
+        return mapper;
+    }
+
     /*
     /**********************************************************************
     /* Helper methods, setup
