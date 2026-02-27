@@ -9,10 +9,18 @@ import com.fasterxml.jackson.databind.type.ReferenceType;
 
 public class JsonNullableDeserializers extends Deserializers.Base {
 
+    private final boolean mapBlankStringToNull;
+
+    public JsonNullableDeserializers(boolean mapBlankStringToNull) {
+        this.mapBlankStringToNull = mapBlankStringToNull;
+    }
+
     @Override
     public JsonDeserializer<?> findReferenceDeserializer(ReferenceType refType,
                                                          DeserializationConfig config, BeanDescription beanDesc,
                                                          TypeDeserializer contentTypeDeserializer, JsonDeserializer<?> contentDeserializer) {
-        return (refType.hasRawClass(JsonNullable.class)) ? new JsonNullableDeserializer(refType, null, contentTypeDeserializer,contentDeserializer) : null;
+        return (refType.hasRawClass(JsonNullable.class))
+            ? new JsonNullableDeserializer(refType, null, contentTypeDeserializer, contentDeserializer, mapBlankStringToNull)
+            : null;
     }
 }

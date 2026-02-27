@@ -19,6 +19,7 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     private static final long serialVersionUID = 1L;
 
     private boolean isStringDeserializer = false;
+    private final boolean mapBlankStringToNull;
 
     /*
     /**********************************************************
@@ -26,8 +27,10 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     /**********************************************************
      */
     public JsonNullableDeserializer(JavaType fullType, ValueInstantiator inst,
-                                    TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
+                                    TypeDeserializer typeDeser, JsonDeserializer<?> deser,
+                                    boolean mapBlankStringToNull) {
         super(fullType, inst, typeDeser, deser);
+        this.mapBlankStringToNull = mapBlankStringToNull;
         if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
             this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
         }
@@ -45,7 +48,7 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
         if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
             String str = p.getText().trim();
             if (str.isEmpty()) {
-                return JsonNullable.undefined();
+                return mapBlankStringToNull ? JsonNullable.of(null) : JsonNullable.undefined();
             }
         }
         return super.deserialize(p, ctxt);
@@ -54,7 +57,7 @@ public class JsonNullableDeserializer extends ReferenceTypeDeserializer<JsonNull
     @Override
     public JsonNullableDeserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
         return new JsonNullableDeserializer(_fullType, _valueInstantiator,
-                typeDeser, valueDeser);
+                typeDeser, valueDeser, mapBlankStringToNull);
     }
 
     @Override
