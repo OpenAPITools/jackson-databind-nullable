@@ -7,24 +7,24 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.UnwrappingBeanPropertyWriter;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 
-public class UnwrappingJsonNullableBeanPropertyWriter extends UnwrappingBeanPropertyWriter
+public class UnwrappingJsonNullableJackson2BeanPropertyWriter extends UnwrappingBeanPropertyWriter
 {
     private static final long serialVersionUID = 1L;
 
-    public UnwrappingJsonNullableBeanPropertyWriter(BeanPropertyWriter base,
-                                                    NameTransformer transformer) {
+    public UnwrappingJsonNullableJackson2BeanPropertyWriter(BeanPropertyWriter base,
+                                                            NameTransformer transformer) {
         super(base, transformer);
     }
 
-    protected UnwrappingJsonNullableBeanPropertyWriter(UnwrappingBeanPropertyWriter base,
-                                                       NameTransformer transformer, SerializedString name) {
+    protected UnwrappingJsonNullableJackson2BeanPropertyWriter(UnwrappingBeanPropertyWriter base,
+                                                               NameTransformer transformer, SerializedString name) {
         super(base, transformer, name);
     }
 
     @Override
     protected UnwrappingBeanPropertyWriter _new(NameTransformer transformer, SerializedString newName)
     {
-        return new UnwrappingJsonNullableBeanPropertyWriter(this, transformer, newName);
+        return new UnwrappingJsonNullableJackson2BeanPropertyWriter(this, transformer, newName);
     }
 
     @Override

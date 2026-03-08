@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 
-public class JsonNullableSerializers extends Serializers.Base {
+public class JsonNullableJackson2Serializers extends Serializers.Base {
 
     @Override
     public JsonSerializer<?> findReferenceSerializer(SerializationConfig config,
@@ -17,7 +17,7 @@ public class JsonNullableSerializers extends Serializers.Base {
         if (JsonNullable.class.isAssignableFrom(refType.getRawClass())) {
             boolean staticTyping = (contentTypeSerializer == null)
                     && config.isEnabled(MapperFeature.USE_STATIC_TYPING);
-            return new JsonNullableSerializer(refType, staticTyping,
+            return new JsonNullableJackson2Serializer(refType, staticTyping,
                     contentTypeSerializer, contentValueSerializer);
         }
         return null;
