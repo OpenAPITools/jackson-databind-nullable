@@ -17,7 +17,7 @@
         <connection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</connection>
         <developerConnection>scm:git:git@github.com:OpenAPITools/jackson-databind-nullable.git</developerConnection>
         <url>https://github.com/OpenAPITools/jackson-databind-nullable</url>
-        <tag>jackson-databind-nullable-0.2.5</tag>
+        <tag>jackson-databind-nullable-0.2.10</tag>
     </scm>
     <licenses>
         <license>
