@@ -40,7 +40,7 @@
         <jackson3-bom.version>3.1.1</jackson3-bom.version>
         <javax-validation-api.version>2.0.1.Final</javax-validation-api.version>
         <jakarta-validation-api.version>3.1.1</jakarta-validation-api.version>
-        <junit.version>5.14.3</junit.version>
+        <junit.version>5.14.4</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <mockito.version>4.11.0</mockito.version>
         <!-- endregion -->
