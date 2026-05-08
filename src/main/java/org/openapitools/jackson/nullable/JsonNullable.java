@@ -89,7 +89,7 @@ public class JsonNullable<T> implements Serializable {
      * NoSuchElementException.
      *
      * @return the value of this JsonNullable
-     * @throws NoSuchElementException if no value if present
+     * @throws NoSuchElementException if no value is present
      *
      * @since 0.2.8
      */
@@ -117,7 +117,7 @@ public class JsonNullable<T> implements Serializable {
     public <X extends Throwable> T orElseThrow(Supplier<? extends X> supplier)
         throws X
     {
-        if( this.isPresent ) {
+        if (this.isPresent) {
             return this.value;
         }
         throw supplier.get();
@@ -278,7 +278,7 @@ public class JsonNullable<T> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public JsonNullable<T> or( Supplier<? extends JsonNullable<? extends T>> supplier ) {
-        if( supplier == null ) {
+        if (supplier == null) {
             throw new NullPointerException("or supplier is null");
         }
         if (this.isPresent) {
