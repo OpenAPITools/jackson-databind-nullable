@@ -1,8 +1,6 @@
 package org.openapitools.jackson.nullable;
 
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -10,15 +8,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.deser.std.ReferenceTypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
-import com.fasterxml.jackson.databind.type.ReferenceType;
-
-import java.io.IOException;
 
 public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<JsonNullable<Object>> {
 
     private static final long serialVersionUID = 1L;
-
-    private boolean isStringDeserializer = false;
 
     /*
     /**********************************************************
@@ -28,9 +21,6 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     public JsonNullableJackson2Deserializer(JavaType fullType, ValueInstantiator inst,
                                             TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
         super(fullType, inst, typeDeser, deser);
-        if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
-            this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
-        }
     }
 
     /*
@@ -38,18 +28,6 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     /* Abstract method implementations
     /**********************************************************
      */
-
-    @Override
-    public JsonNullable<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        JsonToken t = p.getCurrentToken();
-        if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
-            String str = p.getText().trim();
-            if (str.isEmpty()) {
-                return JsonNullable.undefined();
-            }
-        }
-        return super.deserialize(p, ctxt);
-    }
 
     @Override
     public JsonNullableJackson2Deserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
