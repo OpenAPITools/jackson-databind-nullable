@@ -21,14 +21,14 @@ jobs:
           java-version: 17
           distribution: 'temurin'
       - name: Cache and restore Maven packages on master
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         if: ${{ github.ref_name == 'master' }}
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Restore Maven packages on PR
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         if: ${{ github.ref_name != 'master' }}
         with:
           path: ~/.m2
