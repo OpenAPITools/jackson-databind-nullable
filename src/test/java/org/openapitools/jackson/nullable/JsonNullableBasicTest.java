@@ -349,7 +349,7 @@ class JsonNullableBasicTest extends ModuleTestBase {
     @Test
     void testDeserNull() throws Exception {
         JsonNullable<?> value = jsonProcessor.readValue("\"\"", TypeReferences.INTEGER.getType(jsonProcessor));
-        assertFalse(value.isPresent());
+        assertEquals(JsonNullable.of(null), value);
     }
 
     @Test
