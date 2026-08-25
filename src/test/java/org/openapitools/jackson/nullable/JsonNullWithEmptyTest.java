@@ -7,7 +7,7 @@ import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ParameterizedClass
@@ -36,7 +36,7 @@ class JsonNullWithEmptyTest extends ModuleTestBase {
     @Test
     void testJsonNullableFromEmpty() throws Exception {
         JsonNullable<?> value = jsonProcessor.readValue(quote(""), TypeReferences.INTEGER.getType(jsonProcessor));
-        assertFalse(value.isPresent());
+        assertEquals(JsonNullable.of(null), value);
     }
 
     // for [datatype-jdk8#23]
@@ -47,7 +47,7 @@ class JsonNullWithEmptyTest extends ModuleTestBase {
         BooleanBean b = jsonProcessor.readValue(aposToQuotes("{'value':''}"), BooleanBean.class);
         assertNotNull(b.value);
 
-        assertFalse(b.value.isPresent());
+        assertEquals(JsonNullable.of(null), b.value);
     }
 
     private enum TypeReferences {
