@@ -78,6 +78,9 @@ assertEquals(JsonNullable.<String>undefined(), mapper.readValue("{}", Pet.class)
 
 ```
 
+`JsonNullable` can also be used as a `@JsonCreator` constructor parameter.
+An absent property is passed to the constructor as `JsonNullable.undefined()` rather than as `null`, so it stays distinguishable from an explicit `null`.
+
 The `ValueExtractor` is registered automatically via Java Service loader mechanism. The example class above will validate as follows
 ```java
 // instantiate javax.validation.Validator
@@ -89,6 +92,4 @@ assertEquals(1, validationResult.size());
 
 ## Limitations
 
-* Doesn't work when passed as a parameter to a `@JsonCreator` constructor (non present field gets deserialized as null instead of undefined).
-  But as JsonNullable is here to represent "optional" values, there shouldn't be a need to put it in a constructor.
 * Doesn't work with `@JsonUnwrapped`.

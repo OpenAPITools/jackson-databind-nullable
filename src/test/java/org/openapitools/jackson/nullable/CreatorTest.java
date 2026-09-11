@@ -2,19 +2,16 @@ package org.openapitools.jackson.nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: fix JsonNullable in constructor annotated by JsonCreator
-@Disabled("JsonNullable in a constructor is deserialized to JsonNullable[null] instead of JsonNullable.undefined")
 class CreatorTest extends ModuleTestBase {
     static class CreatorWithJsonNullableStrings {
         JsonNullable<String> a, b;
 
-        // note: something weird with test setup, should not need annotations
+        // note: parameter names are not retained by default, hence the explicit @JsonProperty
         @JsonCreator
         public CreatorWithJsonNullableStrings(@JsonProperty("a") JsonNullable<String> a,
                                               @JsonProperty("b") JsonNullable<String> b) {
@@ -45,5 +42,21 @@ class CreatorTest extends ModuleTestBase {
         assertTrue(bean.a.isPresent());
         assertFalse(bean.b.isPresent());
         assertEquals("foo", bean.a.get());
+        assertEquals(JsonNullable.<String>undefined(), bean.b);
+    }
+
+    /**
+     * An absent creator property has to stay distinguishable from one that is
+     * explicitly set to <code>null</code>, which is the reason JsonNullable exists.
+     */
+    @ParameterizedTest
+    @MethodSource("jsonProcessors")
+    void testCreatorSeparatesExplicitNullFromAbsent(JsonProcessor jsonProcessor) throws Exception {
+        jsonProcessor.mapperWithModule();
+        CreatorWithJsonNullableStrings bean = jsonProcessor.readValue(
+                aposToQuotes("{'a':null}"), CreatorWithJsonNullableStrings.class);
+        assertNotNull(bean);
+        assertEquals(JsonNullable.<String>of(null), bean.a);
+        assertEquals(JsonNullable.<String>undefined(), bean.b);
     }
 }
