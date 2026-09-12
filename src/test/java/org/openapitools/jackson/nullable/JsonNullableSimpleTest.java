@@ -144,8 +144,8 @@ final class JsonNullableSimpleTest {
     void deserializeNonStringMembers(JsonProcessor jsonProcessor) throws Exception {
         testReadPetAge(jsonProcessor, JsonNullable.of(Integer.valueOf(15)), "{\"age\":\"15\"}");
         testReadPetAge(jsonProcessor, JsonNullable.<Integer>of(null), "{\"age\":null}");
-        testReadPetAge(jsonProcessor, JsonNullable.<Integer>undefined(), "{\"age\":\"\"}");
-        testReadPetAge(jsonProcessor, JsonNullable.<Integer>undefined(), "{\"age\":\"   \"}");
+        testReadPetAge(jsonProcessor, JsonNullable.<Integer>of(null), "{\"age\":\"\"}");
+        testReadPetAge(jsonProcessor, JsonNullable.<Integer>of(null), "{\"age\":\"   \"}");
         testReadPetAge(jsonProcessor, JsonNullable.<Integer>undefined(), "{}");
     }
 
@@ -163,8 +163,8 @@ final class JsonNullableSimpleTest {
     void deserializeNonStringNonBeanMembers(JsonProcessor jsonProcessor) throws Exception {
         assertEquals(JsonNullable.of(null), jsonProcessor.readValue("\"null\"", TypeReferences.INTEGER.getType(jsonProcessor)));
         assertEquals(JsonNullable.of(42), jsonProcessor.readValue("\"42\"", TypeReferences.INTEGER.getType(jsonProcessor)));
-        assertEquals(JsonNullable.undefined(), jsonProcessor.readValue("\"\"", TypeReferences.INTEGER.getType(jsonProcessor)));
-        assertEquals(JsonNullable.undefined(), jsonProcessor.readValue("\"  \"", TypeReferences.INTEGER.getType(jsonProcessor)));
+        assertEquals(JsonNullable.of(null), jsonProcessor.readValue("\"\"", TypeReferences.INTEGER.getType(jsonProcessor)));
+        assertEquals(JsonNullable.of(null), jsonProcessor.readValue("\"  \"", TypeReferences.INTEGER.getType(jsonProcessor)));
     }
 
     @ParameterizedTest
