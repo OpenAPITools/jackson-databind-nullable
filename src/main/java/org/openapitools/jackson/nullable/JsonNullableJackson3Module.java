@@ -11,12 +11,20 @@ public class JsonNullableJackson3Module extends JacksonModule {
 
     /**
      * Configures whether blank strings (for example {@code ""} or {@code "  "}) deserialized
-     * into a non-String {@code JsonNullable} are mapped to {@code JsonNullable.of(null)}
-     * instead of {@code JsonNullable.undefined()}.
+     * into a {@code JsonNullable} are mapped to {@code JsonNullable.of(null)} instead of
+     * {@code JsonNullable.undefined()}.
      *
      * <p>This matters for PATCH semantics: a blank string sent by a client expresses an
      * explicit intent to clear the value, which {@code undefined()} silently swallows.
-     * String targets are never affected.
+     *
+     * <p>String-like targets ({@code String}, {@code CharSequence} and its implementations
+     * such as {@code StringBuilder}, and {@code Character}) are exempt: for those, a blank
+     * string is a legitimate value in its own right and is never diverted to this option.
+     * A deserializer the application has registered itself for the property's type is also
+     * exempt: it is given the blank string and decides the outcome, and this option does not
+     * override whatever that deserializer returns. In other words, the option only takes
+     * effect where the blank-string guard still runs, i.e. for non-string-like targets still
+     * handled by a deserializer Jackson itself ships.
      *
      * <p>Default is {@code false} for backwards compatibility.
      *

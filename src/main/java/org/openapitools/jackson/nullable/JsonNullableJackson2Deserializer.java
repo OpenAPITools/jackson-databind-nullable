@@ -18,7 +18,32 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
 
     private static final long serialVersionUID = 1L;
 
-    private boolean isStringDeserializer = false;
+    /**
+     * Namespace prefix of Jackson 2 itself: not just {@code jackson-databind}'s own
+     * {@code deser} package, but every FasterXML-published module an application might
+     * add on top of it, e.g. {@code com.fasterxml.jackson.datatype.jsr310.deser}
+     * (java.time support). Used to tell a deserializer Jackson (in the broad sense,
+     * including datatype/other FasterXML modules) ships from one the application
+     * registered itself (directly, via {@code @JsonDeserialize}, or via its own module).
+     */
+    private static final String JACKSON_NAMESPACE_PREFIX = "com.fasterxml.jackson.";
+
+    /**
+     * True when the referenced type is String-like: {@code String}, {@code CharSequence}
+     * (and its implementations, e.g. {@code StringBuilder}) or {@code Character}. For
+     * these types an empty/blank JSON string is a legitimate value in its own right, so
+     * it must never be special-cased into {@link JsonNullable#undefined()}.
+     */
+    private boolean isStringLike = false;
+
+    /**
+     * Deserializers shipped by Jackson itself (databind, datatype and other FasterXML
+     * modules) keep the historical empty/blank-string-means-absent shortcut below;
+     * deserializers from any other namespace, i.e. the application's own or third-party
+     * ones, receive the token (see issue #46).
+     */
+    private boolean isStandardDeserializer = true;
+
     private final boolean mapBlankStringToNull;
 
     /*
@@ -37,8 +62,39 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
         super(fullType, inst, typeDeser, deser);
         this.mapBlankStringToNull = mapBlankStringToNull;
         if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
-            this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
+            JavaType referencedType = ((ReferenceType) fullType).getReferencedType();
+            this.isStringLike = referencedType.isTypeOrSubTypeOf(CharSequence.class)
+                    || referencedType.hasRawClass(Character.class);
         }
+        this.isStandardDeserializer = isJacksonOwnDeserializer(deser);
+    }
+
+    /**
+     * @param deser the resolved delegate (content) deserializer for the referenced type,
+     *              or {@code null} if it has not been resolved yet.
+     * @return whether {@code deser}'s concrete class lives anywhere under Jackson's own
+     * namespace ({@code com.fasterxml.jackson.}) rather than the application's. This is
+     * deliberately namespace-wide, not limited to {@code jackson-databind}'s own {@code
+     * deser} package: FasterXML's own datatype modules (e.g. {@code jackson-datatype-jsr310}
+     * for java.time) ship deserializers outside that package too, and narrowing the check
+     * to it would silently change behaviour for every type such a module handles, on top
+     * of the deliberate change for String-like types. A {@code null} deserializer (not yet
+     * resolved) is conservatively treated as standard, preserving this class's pre-existing
+     * always-intercept behaviour until the real delegate is known.
+     * <p>
+     * This deliberately does not use {@code instanceof StdDeserializer} /
+     * {@code instanceof StdScalarDeserializer}: both are public base classes that an
+     * application's own custom deserializer is free to extend for convenience, and an
+     * instanceof check would misclassify such a deserializer as "standard", silently
+     * reintroducing the bug tracked as issue #46 for
+     * that authoring style. Testing the concrete class's package instead only recognizes
+     * deserializers Jackson itself ships, under any of its own packages.
+     */
+    private static boolean isJacksonOwnDeserializer(JsonDeserializer<?> deser) {
+        if (deser == null) {
+            return true;
+        }
+        return deser.getClass().getName().startsWith(JACKSON_NAMESPACE_PREFIX);
     }
 
     /*
@@ -50,7 +106,7 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     @Override
     public JsonNullable<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonToken t = p.getCurrentToken();
-        if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
+        if (t == JsonToken.VALUE_STRING && !isStringLike && isStandardDeserializer) {
             String str = p.getText().trim();
             if (str.isEmpty()) {
                 return mapBlankStringToNull ? JsonNullable.of(null) : JsonNullable.undefined();
