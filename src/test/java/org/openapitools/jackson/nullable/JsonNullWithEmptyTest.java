@@ -31,6 +31,21 @@ class JsonNullWithEmptyTest extends ModuleTestBase {
         }
     }
 
+    enum Color { RED, GREEN }
+
+    static class EnumBean {
+        public JsonNullable<Color> value;
+    }
+
+    static class Point {
+        public int x;
+        public int y;
+    }
+
+    static class PojoBean {
+        public JsonNullable<Point> value;
+    }
+
     @BeforeEach
     void setup() {
         jsonProcessor.mapperWithModule();
@@ -75,6 +90,26 @@ class JsonNullWithEmptyTest extends ModuleTestBase {
     void testBooleanWithEmptyWithMapBlankStringToNull() throws Exception {
         jsonProcessor.mapperWithModule(true);
         BooleanBean b = jsonProcessor.readValue(aposToQuotes("{'value':''}"), BooleanBean.class);
+        assertNotNull(b.value);
+        assertTrue(b.value.isPresent());
+        assertNull(b.value.get());
+    }
+
+    // The guard runs before the content deserializer, so enum and POJO targets never
+    // see the blank string. Without it these would throw instead of yielding a present null.
+    @Test
+    void testEnumWithEmptyWithMapBlankStringToNull() throws Exception {
+        jsonProcessor.mapperWithModule(true);
+        EnumBean b = jsonProcessor.readValue(aposToQuotes("{'value':''}"), EnumBean.class);
+        assertNotNull(b.value);
+        assertTrue(b.value.isPresent());
+        assertNull(b.value.get());
+    }
+
+    @Test
+    void testPojoWithEmptyWithMapBlankStringToNull() throws Exception {
+        jsonProcessor.mapperWithModule(true);
+        PojoBean b = jsonProcessor.readValue(aposToQuotes("{'value':''}"), PojoBean.class);
         assertNotNull(b.value);
         assertTrue(b.value.isPresent());
         assertNull(b.value.get());
