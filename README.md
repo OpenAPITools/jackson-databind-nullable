@@ -96,6 +96,10 @@ assertEquals(1, validationResult.size());
 * On the module path with Java 17 or newer, nothing is registered through the Java Service loader: `ObjectMapper.findModules()` / `findAndRegisterModules()` won't find `JsonNullableModule`, Jackson 3 won't discover `JsonNullableJackson3Module`, and the `ValueExtractor` isn't picked up either. The Java 17 module descriptor declares Jackson 2, Jackson 3 and both validation APIs as optional, and service declarations for optional dependencies would fail module resolution when they are absent (see [#100](https://github.com/OpenAPITools/jackson-databind-nullable/issues/100)). Register the module explicitly instead:
   ```java
   mapper.registerModule(new JsonNullableModule());                             // Jackson 2
-  JsonMapper.builder().addModule(new JsonNullableJackson3Module()).build();    // Jackson 3
+  JsonMapper mapper = JsonMapper.builder().addModule(new JsonNullableJackson3Module()).build();  // Jackson 3
+
+  Validator validator = Validation.byDefaultProvider().configure()
+          .addValueExtractor(new JsonNullableJakartaValueExtractor())    // or JsonNullableValueExtractor for javax.validation
+          .buildValidatorFactory().getValidator();
   ```
   On the class path all of these are registered automatically. On the module path with Java 9 to 16, `JsonNullableModule` is still discovered, but the `ValueExtractor` has to be registered with your validator explicitly on the module path regardless of Java version.
