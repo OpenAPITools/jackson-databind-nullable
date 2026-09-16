@@ -86,7 +86,7 @@ send a blank string to mean "clear this value" (common with PATCH requests), ena
 `mapBlankStringToNull` so it deserializes to `JsonNullable.of(null)` instead:
 ```java
 mapper.registerModule(new JsonNullableModule().mapBlankStringToNull(true));
-// Jackson 3: JsonMapper.builder().addModule(new JsonNullableJackson3Module().mapBlankStringToNull(true))
+// Jackson 3: JsonMapper mapper = JsonMapper.builder().addModule(new JsonNullableJackson3Module().mapBlankStringToNull(true)).build();
 
 // given a bean with a JsonNullable<Integer> age property:
 assertEquals(JsonNullable.<Integer>of(null), mapper.readValue("{\"age\":\"\"}", Person.class).age);
