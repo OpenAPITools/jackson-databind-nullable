@@ -19,6 +19,7 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     private static final long serialVersionUID = 1L;
 
     private boolean isStringDeserializer = false;
+    private final boolean mapBlankStringToNull;
 
     /*
     /**********************************************************
@@ -27,7 +28,14 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
      */
     public JsonNullableJackson2Deserializer(JavaType fullType, ValueInstantiator inst,
                                             TypeDeserializer typeDeser, JsonDeserializer<?> deser) {
+        this(fullType, inst, typeDeser, deser, false);
+    }
+
+    public JsonNullableJackson2Deserializer(JavaType fullType, ValueInstantiator inst,
+                                            TypeDeserializer typeDeser, JsonDeserializer<?> deser,
+                                            boolean mapBlankStringToNull) {
         super(fullType, inst, typeDeser, deser);
+        this.mapBlankStringToNull = mapBlankStringToNull;
         if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
             this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
         }
@@ -45,7 +53,7 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
         if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
             String str = p.getText().trim();
             if (str.isEmpty()) {
-                return JsonNullable.undefined();
+                return mapBlankStringToNull ? JsonNullable.of(null) : JsonNullable.undefined();
             }
         }
         return super.deserialize(p, ctxt);
@@ -54,7 +62,7 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     @Override
     public JsonNullableJackson2Deserializer withResolved(TypeDeserializer typeDeser, JsonDeserializer<?> valueDeser) {
         return new JsonNullableJackson2Deserializer(_fullType, _valueInstantiator,
-                typeDeser, valueDeser);
+                typeDeser, valueDeser, mapBlankStringToNull);
     }
 
     @Override

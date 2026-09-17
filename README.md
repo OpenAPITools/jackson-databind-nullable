@@ -78,6 +78,21 @@ assertEquals(JsonNullable.<String>undefined(), mapper.readValue("{}", Pet.class)
 
 ```
 
+### Blank strings
+
+By default a blank string (`""` or whitespace only) sent for a non-String `JsonNullable`
+deserializes to `JsonNullable.undefined()`, as if the property were absent. If your clients
+send a blank string to mean "clear this value" (common with PATCH requests), enable
+`mapBlankStringToNull` so it deserializes to `JsonNullable.of(null)` instead:
+```java
+mapper.registerModule(new JsonNullableModule().mapBlankStringToNull(true));
+// Jackson 3: JsonMapper mapper = JsonMapper.builder().addModule(new JsonNullableJackson3Module().mapBlankStringToNull(true)).build();
+
+// given a bean with a JsonNullable<Integer> age property:
+assertEquals(JsonNullable.<Integer>of(null), mapper.readValue("{\"age\":\"\"}", Person.class).age);
+```
+`JsonNullable<String>` properties are never affected: a blank string is a valid string value.
+
 `JsonNullable` can also be used as a `@JsonCreator` constructor parameter.
 An absent property is passed to the constructor as `JsonNullable.undefined()` rather than as `null`, so it stays distinguishable from an explicit `null`.
 

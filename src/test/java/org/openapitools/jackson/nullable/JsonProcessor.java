@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 public interface JsonProcessor {
     JsonProcessor mapperWithModule();
 
+    JsonProcessor mapperWithModule(boolean mapBlankStringToNull);
+
     JsonProcessor setDateFormat(SimpleDateFormat simpleDateFormat);
 
     JsonProcessor setDefaultPropertyInclusion(JsonInclude.Include incl);

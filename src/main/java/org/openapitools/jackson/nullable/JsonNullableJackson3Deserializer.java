@@ -17,6 +17,7 @@ public class JsonNullableJackson3Deserializer extends ReferenceTypeDeserializer<
 
 
     private boolean isStringDeserializer = false;
+    private final boolean mapBlankStringToNull;
 
     /*
     /**********************************************************
@@ -25,7 +26,14 @@ public class JsonNullableJackson3Deserializer extends ReferenceTypeDeserializer<
      */
     public JsonNullableJackson3Deserializer(JavaType fullType, ValueInstantiator inst,
                                             TypeDeserializer typeDeser, ValueDeserializer<?> deser) {
+        this(fullType, inst, typeDeser, deser, false);
+    }
+
+    public JsonNullableJackson3Deserializer(JavaType fullType, ValueInstantiator inst,
+                                            TypeDeserializer typeDeser, ValueDeserializer<?> deser,
+                                            boolean mapBlankStringToNull) {
         super(fullType, inst, typeDeser, deser);
+        this.mapBlankStringToNull = mapBlankStringToNull;
         if (fullType instanceof ReferenceType && ((ReferenceType) fullType).getReferencedType() != null) {
             this.isStringDeserializer = ((ReferenceType) fullType).getReferencedType().isTypeOrSubTypeOf(String.class);
         }
@@ -43,7 +51,7 @@ public class JsonNullableJackson3Deserializer extends ReferenceTypeDeserializer<
         if (t == JsonToken.VALUE_STRING && !isStringDeserializer) {
             String str = p.getString().trim();
             if (str.isEmpty()) {
-                return JsonNullable.undefined();
+                return mapBlankStringToNull ? JsonNullable.of(null) : JsonNullable.undefined();
             }
         }
         return super.deserialize(p, ctxt);
@@ -52,7 +60,7 @@ public class JsonNullableJackson3Deserializer extends ReferenceTypeDeserializer<
     @Override
     protected ReferenceTypeDeserializer<JsonNullable<Object>> withResolved(TypeDeserializer typeDeser, ValueDeserializer<?> valueDeser) {
         return new JsonNullableJackson3Deserializer(_fullType, _valueInstantiator,
-                typeDeser, valueDeser);
+                typeDeser, valueDeser, mapBlankStringToNull);
     }
 
     @Override
