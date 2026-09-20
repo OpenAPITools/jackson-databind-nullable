@@ -24,7 +24,14 @@ public class JsonNullableJackson3Module extends JacksonModule {
      * exempt: it is given the blank string and decides the outcome, and this option does not
      * override whatever that deserializer returns. In other words, the option only takes
      * effect where the blank-string guard still runs, i.e. for non-string-like targets still
-     * handled by a deserializer Jackson itself ships.
+     * handled by a deserializer Jackson itself ships. A converter declared with {@code
+     * @JsonDeserialize(contentConverter = ...)} on a {@code JsonNullable} property resolves
+     * to Jackson's own {@code StdConvertingDeserializer} for the wrapped value, so a blank
+     * string still takes the shortcut above and the converter is not invoked for it;
+     * unchanged from earlier versions. A {@code DelegatingDeserializer} an application
+     * registers around a type's deserializer, directly or via a {@code
+     * ValueDeserializerModifier}, is classified by the innermost deserializer it ultimately
+     * wraps rather than by its own class.
      *
      * <p>Default is {@code false} for backwards compatibility.
      *

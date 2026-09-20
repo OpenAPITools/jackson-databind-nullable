@@ -29,6 +29,14 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     private static final String JACKSON_NAMESPACE_PREFIX = "com.fasterxml.jackson.";
 
     /**
+     * Bound on how many {@link JsonDeserializer#getDelegatee()} hops {@link
+     * #isJacksonOwnDeserializer} will follow while unwrapping a chain of delegating
+     * deserializers, so that a wrapper whose {@code getDelegatee()} misbehaves (e.g.
+     * returns itself, or another wrapper in a cycle) cannot loop forever.
+     */
+    private static final int MAX_DELEGATEE_UNWRAP_HOPS = 16;
+
+    /**
      * True when the referenced type is String-like: {@code String}, {@code CharSequence}
      * (and its implementations, e.g. {@code StringBuilder}) or {@code Character}. For
      * these types an empty/blank JSON string is a legitimate value in its own right, so
@@ -72,8 +80,9 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
     /**
      * @param deser the resolved delegate (content) deserializer for the referenced type,
      *              or {@code null} if it has not been resolved yet.
-     * @return whether {@code deser}'s concrete class lives anywhere under Jackson's own
-     * namespace ({@code com.fasterxml.jackson.}) rather than the application's. This is
+     * @return whether the innermost deserializer {@code deser} ultimately delegates to
+     * (see below) has a concrete class living anywhere under Jackson's own namespace
+     * ({@code com.fasterxml.jackson.}) rather than the application's. This is
      * deliberately namespace-wide, not limited to {@code jackson-databind}'s own {@code
      * deser} package: FasterXML's own datatype modules (e.g. {@code jackson-datatype-jsr310}
      * for java.time) ship deserializers outside that package too, and narrowing the check
@@ -81,6 +90,19 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
      * of the deliberate change for String-like types. A {@code null} deserializer (not yet
      * resolved) is conservatively treated as standard, preserving this class's pre-existing
      * always-intercept behaviour until the real delegate is known.
+     * <p>
+     * Before checking the namespace, this follows {@link JsonDeserializer#getDelegatee()}
+     * (bounded by {@link #MAX_DELEGATEE_UNWRAP_HOPS}) to the innermost deserializer of a
+     * delegation chain and classifies by that one instead of by {@code deser} itself. A
+     * wrapper an application registers around Jackson's own deserializer (a logging or
+     * validation decorator, or one a {@code BeanDeserializerModifier} installs around
+     * Jackson's {@code BeanDeserializer}) decides nothing about blank strings itself; it
+     * only forwards to what it wraps. Classifying by what it wraps instead of by the
+     * wrapper keeps the historical blank-string shortcut for it exactly as it was before
+     * delegation was considered at all. The trade-off is the mirror image: a {@code
+     * DelegatingDeserializer} subclass that special-cases {@code ""} itself, rather than
+     * merely forwarding, is now classified by what it wraps rather than by itself, so its
+     * own handling of blank strings is bypassed whenever what it wraps is Jackson's own.
      * <p>
      * This deliberately does not use {@code instanceof StdDeserializer} /
      * {@code instanceof StdScalarDeserializer}: both are public base classes that an
@@ -94,7 +116,15 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
         if (deser == null) {
             return true;
         }
-        return deser.getClass().getName().startsWith(JACKSON_NAMESPACE_PREFIX);
+        JsonDeserializer<?> innermost = deser;
+        for (int hops = 0; hops < MAX_DELEGATEE_UNWRAP_HOPS; hops++) {
+            JsonDeserializer<?> delegatee = innermost.getDelegatee();
+            if (delegatee == null) {
+                break;
+            }
+            innermost = delegatee;
+        }
+        return innermost.getClass().getName().startsWith(JACKSON_NAMESPACE_PREFIX);
     }
 
     /*
