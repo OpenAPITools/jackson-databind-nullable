@@ -31,7 +31,15 @@ public class JsonNullableModule extends Module {
      * unchanged from earlier versions. A {@code DelegatingDeserializer} an application
      * registers around a type's deserializer, directly or via a {@code
      * BeanDeserializerModifier}, is classified by the innermost deserializer it ultimately
-     * wraps rather than by its own class.
+     * wraps rather than by its own class. A deserializer that extends one of Jackson's own
+     * concrete deserializers ({@code EnumDeserializer}, {@code BeanDeserializer}, {@code
+     * NumberDeserializers.NumberDeserializer}, ...) keeps this shortcut, since it inherits
+     * Jackson's own blank-string handling; one that implements deserialization on Jackson's
+     * abstract bases ({@code JsonDeserializer}, {@code StdDeserializer}, {@code
+     * StdScalarDeserializer}, ...) receives the token instead; and a wrapper that does not
+     * extend {@code DelegatingDeserializer} (or does not override {@code getDelegatee()})
+     * is classified by its own class rather than by what it wraps, so a wrapper should
+     * extend {@code DelegatingDeserializer} to be seen through.
      *
      * <p>Default is {@code false} for backwards compatibility.
      *

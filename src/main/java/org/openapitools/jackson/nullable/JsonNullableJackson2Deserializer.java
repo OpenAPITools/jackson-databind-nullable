@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 
 public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<JsonNullable<Object>> {
 
@@ -27,6 +28,16 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
      * registered itself (directly, via {@code @JsonDeserialize}, or via its own module).
      */
     private static final String JACKSON_NAMESPACE_PREFIX = "com.fasterxml.jackson.";
+
+    /**
+     * This library's own deserializer class, matched by identity rather than by package
+     * prefix: a package-prefix match would claim any class placed in this package,
+     * including this project's own tests and an application's own. Identity matches
+     * exactly this class, which is what the content deserializer of a nested {@code
+     * JsonNullable} is, e.g. {@code JsonNullable<JsonNullable<String>>}. This library's
+     * own blank-string handling is what the outer {@code JsonNullable} should defer to.
+     */
+    private static final Class<?> OWN_DESERIALIZER_CLASS = JsonNullableJackson2Deserializer.class;
 
     /**
      * Bound on how many {@link JsonDeserializer#getDelegatee()} hops {@link
@@ -81,17 +92,21 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
      * @param deser the resolved delegate (content) deserializer for the referenced type,
      *              or {@code null} if it has not been resolved yet.
      * @return whether the innermost deserializer {@code deser} ultimately delegates to
-     * (see below) has a concrete class living anywhere under Jackson's own namespace
-     * ({@code com.fasterxml.jackson.}) rather than the application's. This is
-     * deliberately namespace-wide, not limited to {@code jackson-databind}'s own {@code
-     * deser} package: FasterXML's own datatype modules (e.g. {@code jackson-datatype-jsr310}
-     * for java.time) ship deserializers outside that package too, and narrowing the check
-     * to it would silently change behaviour for every type such a module handles, on top
-     * of the deliberate change for String-like types. A {@code null} deserializer (not yet
-     * resolved) is conservatively treated as standard, preserving this class's pre-existing
-     * always-intercept behaviour until the real delegate is known.
+     * (see below) is classified as Jackson's own: walking up from its concrete class to
+     * the nearest ancestor whose class name lives under Jackson's own namespace ({@code
+     * com.fasterxml.jackson.}) or is this library's own class ({@link #OWN_DESERIALIZER_CLASS}),
+     * that ancestor being this library's own class or a concrete Jackson class counts as
+     * standard, an abstract Jackson class counts as application-owned (see below for the
+     * full rule). This is deliberately namespace-wide, not limited to {@code
+     * jackson-databind}'s own {@code deser} package: FasterXML's own datatype modules
+     * (e.g. {@code jackson-datatype-jsr310} for java.time) ship deserializers outside that
+     * package too, and narrowing the check to it would silently change behaviour for every
+     * type such a module handles, on top of the deliberate change for String-like types.
+     * A {@code null} deserializer (not yet resolved) is conservatively treated as standard,
+     * preserving this class's pre-existing always-intercept behaviour until the real
+     * delegate is known.
      * <p>
-     * Before checking the namespace, this follows {@link JsonDeserializer#getDelegatee()}
+     * Before walking the class hierarchy, this follows {@link JsonDeserializer#getDelegatee()}
      * (bounded by {@link #MAX_DELEGATEE_UNWRAP_HOPS}) to the innermost deserializer of a
      * delegation chain and classifies by that one instead of by {@code deser} itself. A
      * wrapper an application registers around Jackson's own deserializer (a logging or
@@ -102,15 +117,48 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
      * delegation was considered at all. The trade-off is the mirror image: a {@code
      * DelegatingDeserializer} subclass that special-cases {@code ""} itself, rather than
      * merely forwarding, is now classified by what it wraps rather than by itself, so its
-     * own handling of blank strings is bypassed whenever what it wraps is Jackson's own.
+     * own handling of blank strings is bypassed whenever what it wraps is Jackson's own. A
+     * wrapper that does not extend {@code DelegatingDeserializer} (or does not override
+     * {@code getDelegatee()}) is not seen through this way and is classified by its own
+     * class instead.
      * <p>
-     * This deliberately does not use {@code instanceof StdDeserializer} /
-     * {@code instanceof StdScalarDeserializer}: both are public base classes that an
-     * application's own custom deserializer is free to extend for convenience, and an
-     * instanceof check would misclassify such a deserializer as "standard", silently
-     * reintroducing the bug tracked as issue #46 for
-     * that authoring style. Testing the concrete class's package instead only recognizes
-     * deserializers Jackson itself ships, under any of its own packages.
+     * From the innermost deserializer's concrete class, this walks up the superclass chain
+     * (the class itself included) to the nearest ancestor whose name starts with either
+     * prefix above:
+     * <ul>
+     * <li>no such ancestor exists (a class implementing the deserializer interface from
+     * scratch without extending anything of Jackson's or this library's): application-owned.
+     * On Jackson 2 this branch is unreachable, since {@code JsonDeserializer} itself is an
+     * abstract class under Jackson's own namespace and therefore always matches, but it is
+     * kept for safety.
+     * <li>the ancestor is this library's own class (nested {@code JsonNullable}, e.g.
+     * {@code JsonNullable<JsonNullable<String>>}, whose content deserializer is another
+     * instance of this class): standard, since this library's own blank-string handling is
+     * exactly what the outer {@code JsonNullable} should defer to.
+     * <li>the ancestor is one of Jackson's own classes and is <em>abstract</em> (e.g.
+     * {@code JsonDeserializer}, {@code StdDeserializer}, {@code StdScalarDeserializer}):
+     * application-owned. Extending an abstract base and implementing the actual
+     * deserialization is exactly the #46 authoring style, and it must keep receiving the
+     * token regardless of how many abstract layers of Jackson's own it is built on.
+     * <li>the ancestor is one of Jackson's own classes and is <em>concrete</em> (e.g.
+     * {@code EnumDeserializer}, {@code BeanDeserializer}, {@code
+     * NumberDeserializers.NumberDeserializer}): standard, whether or not the subclass
+     * overrides {@code deserialize()}. The shortcut runs before the subclass is ever
+     * reached, exactly as it did for that concrete Jackson deserializer before delegation
+     * was considered at all; to handle blank strings itself, a deserializer extends one of
+     * Jackson's abstract bases instead (the bullet above).
+     * </ul>
+     * <p>
+     * This deliberately does not use a bare {@code instanceof StdDeserializer} /
+     * {@code instanceof StdScalarDeserializer} check: both are public base classes that an
+     * application's own custom deserializer is free to extend for convenience, and treating
+     * every instance as "standard" would misclassify such a deserializer, silently
+     * reintroducing the bug tracked as issue #46 for that authoring style. The
+     * abstract/concrete distinction above is exactly what keeps that authoring style
+     * application-owned: {@code StdDeserializer} and {@code StdScalarDeserializer} are
+     * themselves abstract, so an application class built directly on either one still
+     * receives the token, while a subclass of one of Jackson's own concrete deserializers
+     * (which has already implemented {@code deserialize()} itself) does not.
      */
     private static boolean isJacksonOwnDeserializer(JsonDeserializer<?> deser) {
         if (deser == null) {
@@ -124,7 +172,16 @@ public class JsonNullableJackson2Deserializer extends ReferenceTypeDeserializer<
             }
             innermost = delegatee;
         }
-        return innermost.getClass().getName().startsWith(JACKSON_NAMESPACE_PREFIX);
+        for (Class<?> ancestor = innermost.getClass(); ancestor != null; ancestor = ancestor.getSuperclass()) {
+            String name = ancestor.getName();
+            if (ancestor == OWN_DESERIALIZER_CLASS) {
+                return true;
+            }
+            if (name.startsWith(JACKSON_NAMESPACE_PREFIX)) {
+                return !Modifier.isAbstract(ancestor.getModifiers());
+            }
+        }
+        return false;
     }
 
     /*

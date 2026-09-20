@@ -8,9 +8,16 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.BeanDeserializer;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerBase;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer;
+import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers;
+import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
+import com.fasterxml.jackson.databind.introspect.AnnotatedClassResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.util.EnumResolver;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import org.junit.jupiter.api.Test;
 
@@ -379,5 +386,319 @@ class JsonNullWithEmptyCustomDeserializerTest extends ModuleTestBase {
         assertTrue(withValue.value.isPresent());
         assertEquals("hi", withValue.value.get().tag);
         assertEquals(1, JACKSON3_CONTENT_CONVERTER_INVOCATIONS.get());
+    }
+
+
+    // --------------------------------------------------------------------------------------
+    // Regression coverage for the abstract/concrete distinction added to
+    // isJacksonOwnDeserializer (found by an independent case sweep after the review of
+    // #187 that prompted the innermost-delegate change above): a subclass of one of
+    // Jackson's own CONCRETE deserializers (EnumDeserializer, BeanDeserializer,
+    // NumberDeserializers.NumberDeserializer) that does not override deserialize() adds
+    // nothing to Jackson's own blank-string handling and must keep the shortcut, exactly
+    // like using that concrete deserializer unwrapped. Classifying every non-Jackson class
+    // name as application-owned (the innermost-delegate change alone) misclassified this
+    // case as application-owned instead, since the SUBCLASS's own name is not under
+    // Jackson's namespace - only the ancestor it does nothing but inherit from is.
+    // --------------------------------------------------------------------------------------
+
+    enum WrappedEnum { ONE, TWO }
+
+    static class WrappedEnumBox {
+        public JsonNullable<WrappedEnum> value;
+    }
+
+    static class WrappedNumberBox {
+        public JsonNullable<Number> value;
+    }
+
+    static class NestedJsonNullableBox {
+        public JsonNullable<JsonNullable<String>> value;
+    }
+
+    // (a) An application subclass of Jackson's own concrete EnumDeserializer, changing
+    // nothing about deserialize(), registered for WrappedEnum via addDeserializer.
+    static class AppEnumJackson2Deserializer extends EnumDeserializer {
+        AppEnumJackson2Deserializer(EnumResolver resolver) {
+            super(resolver, false, null, null);
+        }
+    }
+
+    static class AppEnumJackson3Deserializer extends tools.jackson.databind.deser.jdk.EnumDeserializer {
+        AppEnumJackson3Deserializer(tools.jackson.databind.util.EnumResolver resolver) {
+            super(resolver, false, null, null);
+        }
+    }
+
+    // Builds the EnumResolver from public API (AnnotatedClassResolver + EnumResolver's own
+    // factory) rather than reaching into Jackson's private construction path - this is
+    // exactly the shape of resolver Jackson itself would have built for WrappedEnum.
+    private static AppEnumJackson2Deserializer buildAppEnumJackson2Deserializer() {
+        DeserializationConfig config = new ObjectMapper().getDeserializationConfig();
+        AnnotatedClass ac = AnnotatedClassResolver.resolveWithoutSuperTypes(config, WrappedEnum.class);
+        EnumResolver resolver = EnumResolver.constructUsingToString(config, ac);
+        return new AppEnumJackson2Deserializer(resolver);
+    }
+
+    private static AppEnumJackson3Deserializer buildAppEnumJackson3Deserializer() {
+        tools.jackson.databind.DeserializationConfig config =
+                tools.jackson.databind.json.JsonMapper.builder().build().deserializationConfig();
+        tools.jackson.databind.introspect.AnnotatedClass ac =
+                tools.jackson.databind.introspect.AnnotatedClassResolver.resolveWithoutSuperTypes(config, WrappedEnum.class);
+        tools.jackson.databind.util.EnumResolver resolver =
+                tools.jackson.databind.util.EnumResolver.constructUsingToString(config, ac);
+        return new AppEnumJackson3Deserializer(resolver);
+    }
+
+    @Test
+    void testJackson2EnumDeserializerSubclassYieldsUndefinedForEmptyString() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonNullableModule());
+        SimpleModule custom = new SimpleModule();
+        custom.addDeserializer(WrappedEnum.class, JsonNullWithEmptyCustomDeserializerTest.<WrappedEnum>uncheckedAsJackson2Deserializer(buildAppEnumJackson2Deserializer()));
+        mapper.registerModule(custom);
+
+        WrappedEnumBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedEnumBox.class);
+        assertNotNull(box.value);
+        assertFalse(box.value.isPresent());
+    }
+
+    @Test
+    void testJackson2EnumDeserializerSubclassYieldsPresentNullWithMapBlankStringToNull() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonNullableModule().mapBlankStringToNull(true));
+        SimpleModule custom = new SimpleModule();
+        custom.addDeserializer(WrappedEnum.class, JsonNullWithEmptyCustomDeserializerTest.<WrappedEnum>uncheckedAsJackson2Deserializer(buildAppEnumJackson2Deserializer()));
+        mapper.registerModule(custom);
+
+        WrappedEnumBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedEnumBox.class);
+        assertNotNull(box.value);
+        assertTrue(box.value.isPresent());
+        assertNull(box.value.get());
+    }
+
+    @Test
+    void testJackson3EnumDeserializerSubclassYieldsUndefinedForEmptyString() throws Exception {
+        tools.jackson.databind.module.SimpleModule custom = new tools.jackson.databind.module.SimpleModule();
+        custom.addDeserializer(WrappedEnum.class, JsonNullWithEmptyCustomDeserializerTest.<WrappedEnum>uncheckedAsJackson3Deserializer(buildAppEnumJackson3Deserializer()));
+        tools.jackson.databind.ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .addModule(new JsonNullableJackson3Module())
+                .addModule(custom)
+                .build();
+
+        WrappedEnumBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedEnumBox.class);
+        assertNotNull(box.value);
+        assertFalse(box.value.isPresent());
+    }
+
+    @Test
+    void testJackson3EnumDeserializerSubclassYieldsPresentNullWithMapBlankStringToNull() throws Exception {
+        tools.jackson.databind.module.SimpleModule custom = new tools.jackson.databind.module.SimpleModule();
+        custom.addDeserializer(WrappedEnum.class, JsonNullWithEmptyCustomDeserializerTest.<WrappedEnum>uncheckedAsJackson3Deserializer(buildAppEnumJackson3Deserializer()));
+        tools.jackson.databind.ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .addModule(new JsonNullableJackson3Module().mapBlankStringToNull(true))
+                .addModule(custom)
+                .build();
+
+        WrappedEnumBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedEnumBox.class);
+        assertNotNull(box.value);
+        assertTrue(box.value.isPresent());
+        assertNull(box.value.get());
+    }
+
+    // (b) An application subclass of Jackson's own concrete BeanDeserializer, installed by
+    // a modifier via the copy constructor both generations expose for exactly this purpose,
+    // changing nothing about deserialize().
+    static class AppBeanJackson2Deserializer extends BeanDeserializer {
+        AppBeanJackson2Deserializer(BeanDeserializerBase src) {
+            super(src);
+        }
+    }
+
+    static class AppBeanJackson3Deserializer extends tools.jackson.databind.deser.bean.BeanDeserializer {
+        AppBeanJackson3Deserializer(tools.jackson.databind.deser.bean.BeanDeserializer src) {
+            super(src);
+        }
+    }
+
+    static class BeanSubclassJackson2Modifier extends BeanDeserializerModifier {
+        private final Class<?> targetClass;
+
+        BeanSubclassJackson2Modifier(Class<?> targetClass) {
+            this.targetClass = targetClass;
+        }
+
+        @Override
+        public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription beanDesc,
+                                                       JsonDeserializer<?> deserializer) {
+            if (beanDesc.getBeanClass() == targetClass && deserializer instanceof BeanDeserializerBase) {
+                return new AppBeanJackson2Deserializer((BeanDeserializerBase) deserializer);
+            }
+            return deserializer;
+        }
+    }
+
+    static class BeanSubclassJackson3Modifier extends tools.jackson.databind.deser.ValueDeserializerModifier {
+        private final Class<?> targetClass;
+
+        BeanSubclassJackson3Modifier(Class<?> targetClass) {
+            this.targetClass = targetClass;
+        }
+
+        @Override
+        public tools.jackson.databind.ValueDeserializer<?> modifyDeserializer(
+                tools.jackson.databind.DeserializationConfig config,
+                tools.jackson.databind.BeanDescription.Supplier beanDesc,
+                tools.jackson.databind.ValueDeserializer<?> deserializer) {
+            if (beanDesc.getBeanClass() == targetClass && deserializer instanceof tools.jackson.databind.deser.bean.BeanDeserializer) {
+                return new AppBeanJackson3Deserializer((tools.jackson.databind.deser.bean.BeanDeserializer) deserializer);
+            }
+            return deserializer;
+        }
+    }
+
+    @Test
+    void testJackson2BeanDeserializerSubclassYieldsUndefinedForEmptyString() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonNullableModule());
+        SimpleModule custom = new SimpleModule();
+        custom.setDeserializerModifier(new BeanSubclassJackson2Modifier(WrappedPojo.class));
+        mapper.registerModule(custom);
+
+        WrappedPojoBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedPojoBox.class);
+        assertNotNull(box.value);
+        assertFalse(box.value.isPresent());
+    }
+
+    @Test
+    void testJackson2BeanDeserializerSubclassYieldsPresentNullWithMapBlankStringToNull() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonNullableModule().mapBlankStringToNull(true));
+        SimpleModule custom = new SimpleModule();
+        custom.setDeserializerModifier(new BeanSubclassJackson2Modifier(WrappedPojo.class));
+        mapper.registerModule(custom);
+
+        WrappedPojoBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedPojoBox.class);
+        assertNotNull(box.value);
+        assertTrue(box.value.isPresent());
+        assertNull(box.value.get());
+    }
+
+    @Test
+    void testJackson3BeanDeserializerSubclassYieldsUndefinedForEmptyString() throws Exception {
+        tools.jackson.databind.module.SimpleModule custom = new tools.jackson.databind.module.SimpleModule();
+        custom.setDeserializerModifier(new BeanSubclassJackson3Modifier(WrappedPojo.class));
+        tools.jackson.databind.ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .addModule(new JsonNullableJackson3Module())
+                .addModule(custom)
+                .build();
+
+        WrappedPojoBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedPojoBox.class);
+        assertNotNull(box.value);
+        assertFalse(box.value.isPresent());
+    }
+
+    @Test
+    void testJackson3BeanDeserializerSubclassYieldsPresentNullWithMapBlankStringToNull() throws Exception {
+        tools.jackson.databind.module.SimpleModule custom = new tools.jackson.databind.module.SimpleModule();
+        custom.setDeserializerModifier(new BeanSubclassJackson3Modifier(WrappedPojo.class));
+        tools.jackson.databind.ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .addModule(new JsonNullableJackson3Module().mapBlankStringToNull(true))
+                .addModule(custom)
+                .build();
+
+        WrappedPojoBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedPojoBox.class);
+        assertNotNull(box.value);
+        assertTrue(box.value.isPresent());
+        assertNull(box.value.get());
+    }
+
+    // (c) An application subclass of Jackson's own concrete NumberDeserializers.NumberDeserializer
+    // for a JsonNullable<Number>. Its declared type is JsonDeserializer<Object> (the base
+    // class's own type parameter), which does not satisfy addDeserializer's
+    // JsonDeserializer<? extends T> bound for T=Number - an unchecked cast is unavoidable
+    // and safe here since Jackson only ever consults the deserializer's runtime type.
+    static class AppNumberJackson2Deserializer extends NumberDeserializers.NumberDeserializer {
+    }
+
+    static class AppNumberJackson3Deserializer extends tools.jackson.databind.deser.jdk.NumberDeserializers.NumberDeserializer {
+    }
+
+    // EnumDeserializer and NumberDeserializers.NumberDeserializer both declare themselves
+    // as *Deserializer<Object> (their own base class's type parameter), which never
+    // satisfies addDeserializer's JsonDeserializer<? extends T> bound for a narrower T
+    // (WrappedEnum, Number). An unchecked cast is unavoidable and safe here since Jackson
+    // only ever consults the deserializer's runtime type, never this static one.
+    @SuppressWarnings("unchecked")
+    private static <T> JsonDeserializer<T> uncheckedAsJackson2Deserializer(JsonDeserializer<?> raw) {
+        return (JsonDeserializer<T>) raw;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> tools.jackson.databind.ValueDeserializer<T> uncheckedAsJackson3Deserializer(tools.jackson.databind.ValueDeserializer<?> raw) {
+        return (tools.jackson.databind.ValueDeserializer<T>) raw;
+    }
+
+    @Test
+    void testJackson2NumberDeserializerSubclassYieldsUndefinedForEmptyString() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonNullableModule());
+        SimpleModule custom = new SimpleModule();
+        custom.addDeserializer(Number.class, JsonNullWithEmptyCustomDeserializerTest.<Number>uncheckedAsJackson2Deserializer(new AppNumberJackson2Deserializer()));
+        mapper.registerModule(custom);
+
+        WrappedNumberBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedNumberBox.class);
+        assertNotNull(box.value);
+        assertFalse(box.value.isPresent());
+    }
+
+    @Test
+    void testJackson3NumberDeserializerSubclassYieldsUndefinedForEmptyString() throws Exception {
+        tools.jackson.databind.module.SimpleModule custom = new tools.jackson.databind.module.SimpleModule();
+        custom.addDeserializer(Number.class, JsonNullWithEmptyCustomDeserializerTest.<Number>uncheckedAsJackson3Deserializer(new AppNumberJackson3Deserializer()));
+        tools.jackson.databind.ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .addModule(new JsonNullableJackson3Module())
+                .addModule(custom)
+                .build();
+
+        WrappedNumberBox box = mapper.readValue(aposToQuotes("{'value':''}"), WrappedNumberBox.class);
+        assertNotNull(box.value);
+        assertFalse(box.value.isPresent());
+    }
+
+    // (d) JsonNullable<JsonNullable<String>>: the outer's content deserializer is another
+    // instance of this library's own deserializer, which must be classified as standard so
+    // the outer keeps its own undefined()/mapBlankStringToNull shortcut for "" instead of
+    // ever reaching the inner JsonNullable's isStringLike-exempt handling of "". A non-blank
+    // string proves the nesting itself still works end to end.
+    @Test
+    void testJackson2NestedJsonNullableEmptyStringYieldsUndefined() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonNullableModule());
+
+        NestedJsonNullableBox empty = mapper.readValue(aposToQuotes("{'value':''}"), NestedJsonNullableBox.class);
+        assertNotNull(empty.value);
+        assertFalse(empty.value.isPresent());
+
+        NestedJsonNullableBox withValue = mapper.readValue(aposToQuotes("{'value':'x'}"), NestedJsonNullableBox.class);
+        assertTrue(withValue.value.isPresent());
+        assertTrue(withValue.value.get().isPresent());
+        assertEquals("x", withValue.value.get().get());
+    }
+
+    @Test
+    void testJackson3NestedJsonNullableEmptyStringYieldsUndefined() throws Exception {
+        tools.jackson.databind.ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .addModule(new JsonNullableJackson3Module())
+                .build();
+
+        NestedJsonNullableBox empty = mapper.readValue(aposToQuotes("{'value':''}"), NestedJsonNullableBox.class);
+        assertNotNull(empty.value);
+        assertFalse(empty.value.isPresent());
+
+        NestedJsonNullableBox withValue = mapper.readValue(aposToQuotes("{'value':'x'}"), NestedJsonNullableBox.class);
+        assertTrue(withValue.value.isPresent());
+        assertTrue(withValue.value.get().isPresent());
+        assertEquals("x", withValue.value.get().get());
     }
 }
