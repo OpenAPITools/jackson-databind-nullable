@@ -61,6 +61,8 @@ XmlMapper xmlMapper = new XmlMapper();
 xmlMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 xmlMapper.registerModule(new JsonNullableModule());
 ```
+`setSerializationInclusion` changes only what the mapper writes, never what `readValue` returns, and `JsonNullable` properties ignore it: `undefined()` is always omitted and `of(null)` is always written as `null`. It drops plain `null` properties from the output. Through that it also changes `convertValue`, which writes and then reads: a `null` value that `NON_NULL` drops on the write reads back as `undefined()` instead of `of(null)` ([#55](https://github.com/OpenAPITools/jackson-databind-nullable/issues/55)).
+
 Then we can serialize
 ```java
 assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>undefined())));
