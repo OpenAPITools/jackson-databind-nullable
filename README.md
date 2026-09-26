@@ -90,6 +90,9 @@ mapper.registerModule(new JsonNullableModule().mapBlankStringToNull(true));
 assertEquals(JsonNullable.<Integer>of(null), mapper.readValue("{\"age\":\"\"}", Person.class).age);
 ```
 `JsonNullable<String>` properties are never affected: a blank string is a valid string value.
+A converter declared with `@JsonDeserialize(contentConverter = ...)` on a `JsonNullable<T>` property resolves to Jackson's own `StdDelegatingDeserializer` (Jackson 3: `StdConvertingDeserializer`) for the wrapped value, so a blank string still takes the shortcut above and the converter is not invoked for it; unchanged from earlier versions.
+A `DelegatingDeserializer` an application registers around a type's deserializer (directly, or via a `BeanDeserializerModifier`) is classified by the innermost deserializer it ultimately wraps, not by its own class, so a pass-through wrapper around Jackson's own deserializer keeps the shortcut above and one around an application deserializer keeps deferring to it.
+A deserializer that extends one of Jackson's own concrete deserializers (`EnumDeserializer`, `BeanDeserializer`, `NumberDeserializers.NumberDeserializer`, ...) keeps the shortcut above, since it inherits Jackson's own blank-string handling; one that implements deserialization on Jackson's abstract bases (`JsonDeserializer`, `StdDeserializer`, `StdScalarDeserializer`, ...) receives the token instead; and a wrapper that does not extend `DelegatingDeserializer` (or does not override `getDelegatee()`) is classified by its own class rather than by what it wraps, so a wrapper should extend `DelegatingDeserializer` to be seen through.
 
 `JsonNullable` can also be used as a `@JsonCreator` constructor parameter.
 An absent property is passed to the constructor as `JsonNullable.undefined()` rather than as `null`, so it stays distinguishable from an explicit `null`.
