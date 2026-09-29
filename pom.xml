@@ -113,6 +113,15 @@
             <version>${hibernate-validator.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- java.time (JsonNullable<LocalDate>/<OffsetDateTime>) regression coverage on the
+             Jackson 2 stack; version managed by the jackson-bom import above. Jackson 3's
+             java.time support ships inside jackson-databind itself, so it needs no
+             equivalent dependency. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
