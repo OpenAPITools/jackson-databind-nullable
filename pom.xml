@@ -32,6 +32,8 @@
         <packageVersion.dir>org/openapitools/jackson/nullable</packageVersion.dir>
         <packageVersion.package>${project.groupId}.jackson.nullable</packageVersion.package>
         <java.version>8</java.version>
+        <!-- Records in test sources need Java 16+. Main sources stay on ${java.version}. -->
+        <maven.compiler.testRelease>17</maven.compiler.testRelease>
 
         <!-- region Dependency Versions -->
         <!-- Validator 8+ requires Java 11, Validator 9+ requires Java 17. -->
