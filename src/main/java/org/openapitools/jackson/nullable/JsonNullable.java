@@ -15,6 +15,8 @@ public class JsonNullable<T> implements Serializable {
 
     private static final JsonNullable<?> UNDEFINED = new JsonNullable<>(null, false);
 
+    private static final JsonNullable<?> NULL = new JsonNullable<>(null, true);
+
     private final T value;
 
     private final boolean isPresent;
@@ -33,6 +35,21 @@ public class JsonNullable<T> implements Serializable {
     public static <T> JsonNullable<T> undefined() {
         @SuppressWarnings("unchecked")
         JsonNullable<T> t = (JsonNullable<T>) UNDEFINED;
+        return t;
+    }
+
+    /**
+     * Create a <code>JsonNullable</code> representing an explicit <code>null</code>
+     * (present, with a <code>null</code> value). Equal to <code>of(null)</code>.
+     *
+     * @param <T> a type wildcard
+     * @return a <code>JsonNullable</code> holding an explicit <code>null</code>
+     *
+     * @since 0.2.13
+     */
+    public static <T> JsonNullable<T> ofNull() {
+        @SuppressWarnings("unchecked")
+        JsonNullable<T> t = (JsonNullable<T>) NULL;
         return t;
     }
 
@@ -144,6 +161,30 @@ public class JsonNullable<T> implements Serializable {
     }
 
     /**
+     * If the value is present and <code>null</code>, returns true, otherwise false.
+     * An undefined <code>JsonNullable</code> is not null.
+     *
+     * @return true if the value is present and <code>null</code>, otherwise false
+     *
+     * @since 0.2.13
+     */
+    public boolean isNull() {
+        return isPresent && value == null;
+    }
+
+    /**
+     * If the value is present and not <code>null</code>, returns true, otherwise
+     * false.
+     *
+     * @return true if the value is present and not <code>null</code>, otherwise false
+     *
+     * @since 0.2.13
+     */
+    public boolean isNonNull() {
+        return isPresent && value != null;
+    }
+
+    /**
      * If a value is present, performs the given action with the value,
      * otherwise does nothing.
      *
@@ -155,6 +196,22 @@ public class JsonNullable<T> implements Serializable {
             Consumer<? super T> action) {
 
         if (this.isPresent) {
+            action.accept(value);
+        }
+    }
+
+    /**
+     * If the value is present and not <code>null</code>, performs the given
+     * action with the value, otherwise does nothing.
+     *
+     * @param action the action to be performed, if a non-null value is present
+     * @throws NullPointerException if a non-null value is present and the given
+     *         action is null
+     *
+     * @since 0.2.13
+     */
+    public void ifNotNull(Consumer<? super T> action) {
+        if (isNonNull()) {
             action.accept(value);
         }
     }
