@@ -270,10 +270,13 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>17</source>
+                    <source>${java.version}</source>
                     <doclint>none</doclint>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <failOnWarnings>false</failOnWarnings>
+                    <failOnError>true</failOnError>
+                    <!-- the inherited Java 8 API link redirects, and javadoc on JDK 25 fails on it -->
+                    <links combine.self="override"/>
                     <quiet>true</quiet>
                     <additionalOptions>
                         <additionalOption>-Xdoclint:none</additionalOption>
