@@ -99,6 +99,10 @@ A deserializer that extends one of Jackson's own concrete deserializers (`EnumDe
 `JsonNullable` can also be used as a `@JsonCreator` constructor parameter.
 An absent property is passed to the constructor as `JsonNullable.undefined()` rather than as `null`, so it stays distinguishable from an explicit `null`.
 
+`JsonNullable` also works as a record component on Jackson 2 and Jackson 3, the same way as for fields.
+A property missing from the JSON reaches the record as `JsonNullable.undefined()` and an explicit `null` as `JsonNullable.of(null)`.
+When writing, `undefined()` is left out and `of(null)` is written as `null`.
+
 On the class path, the `ValueExtractor` is registered automatically via the Java Service loader mechanism (see [Limitations](#limitations) for the module path). The example class above will validate as follows
 ```java
 // instantiate javax.validation.Validator
