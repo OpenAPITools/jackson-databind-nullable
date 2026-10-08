@@ -4,6 +4,8 @@ module org.openapitools.jackson.nullable {
     requires static java.validation;
 
     exports org.openapitools.jackson.nullable;
+    exports org.openapitools.jackson.nullable.jakarta;
+    exports org.openapitools.jackson.nullable.javax;
 
     provides com.fasterxml.jackson.databind.Module with org.openapitools.jackson.nullable.JsonNullableModule;
     // These service providers for optional dependencies can be added, if baseline is 25+ or javax support is dropped
