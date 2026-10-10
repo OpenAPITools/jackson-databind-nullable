@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests for the null-state helpers: ofNull, isNull, isNonNull and ifNotNull.
+ * Tests for the null-state helpers: ofNull, isNull, isNonNull and ifNonNull.
  */
 class JsonNullableNullStateTest {
 
@@ -52,19 +52,19 @@ class JsonNullableNullStateTest {
     }
 
     @Test
-    void ifNotNullRunsOnlyForNonNullValue() {
+    void ifNonNullRunsOnlyForNonNullValue() {
         List<Object> seen = new ArrayList<>();
-        JsonNullable.of("value").ifNotNull(seen::add);
-        JsonNullable.<String>ofNull().ifNotNull(seen::add);
-        JsonNullable.<String>undefined().ifNotNull(seen::add);
+        JsonNullable.of("value").ifNonNull(seen::add);
+        JsonNullable.<String>ofNull().ifNonNull(seen::add);
+        JsonNullable.<String>undefined().ifNonNull(seen::add);
         assertEquals(List.of("value"), seen);
     }
 
     @Test
-    void ifNotNullAcceptsSupertypeConsumer() {
+    void ifNonNullAcceptsSupertypeConsumer() {
         List<Object> seen = new ArrayList<>();
         java.util.function.Consumer<Object> consumer = seen::add;
-        JsonNullable.of(42).ifNotNull(consumer);
+        JsonNullable.of(42).ifNonNull(consumer);
         assertEquals(List.of(42), seen);
     }
 }

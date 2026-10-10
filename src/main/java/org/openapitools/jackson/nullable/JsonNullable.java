@@ -210,7 +210,7 @@ public class JsonNullable<T> implements Serializable {
      *
      * @since 0.2.13
      */
-    public void ifNotNull(Consumer<? super T> action) {
+    public void ifNonNull(Consumer<? super T> action) {
         if (isNonNull()) {
             action.accept(value);
         }
