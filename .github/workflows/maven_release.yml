@@ -66,7 +66,8 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Publish package
-        run: mvn -Dmaven.test.skip=true --batch-mode -P ossrh-publish -Dgpg.passphrase=${{ secrets.ORG_GPG_PASSPHRASE }} deploy
+        # Maven 3.10 offers the credentials of server 'central' only to repo.maven.apache.org; the upload goes to central.sonatype.com
+        run: mvn -Dmaven.test.skip=true --batch-mode -P ossrh-publish -Dmaven.repository.credentialScope=id -Dgpg.passphrase=${{ secrets.ORG_GPG_PASSPHRASE }} deploy
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
