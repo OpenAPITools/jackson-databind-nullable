@@ -112,6 +112,22 @@ Set<ConstraintViolation<Pet>> validationResult = validator.validate(myPet);
 assertEquals(1, validationResult.size());
 ```
 
+## Requiring a property to be present
+
+`@Present` checks that a `JsonNullable` was set: `JsonNullable.undefined()` and a `null` reference are invalid, an explicit `null` (`JsonNullable.of(null)`) and any value are valid.
+It is the opposite of `@NotNull` on a `JsonNullable`, which accepts an undefined property and rejects an explicit `null`.
+The `ValueExtractor` unwraps `JsonNullable` by default, so the constraint only sees the wrapper when unwrapping is skipped where it is used:
+```java
+import jakarta.validation.valueextraction.Unwrapping;
+import org.openapitools.jackson.nullable.jakarta.Present;
+
+@Present(payload = Unwrapping.Skip.class)
+public JsonNullable<String> color = JsonNullable.undefined();
+```
+The annotation comes in two packages with the same name, `org.openapitools.jackson.nullable.jakarta` for `jakarta.validation` and `org.openapitools.jackson.nullable.javax` for `javax.validation`.
+Without the payload, while the module's `ValueExtractor` is registered (the default on the class path), an undefined property and a `null` reference pass unchecked and a defined value, an explicit `null` included, makes Hibernate Validator throw an `UnexpectedTypeException` (HV000030); without the extractor a plain `@Present` simply checks presence. This was measured on Hibernate Validator 6.2.5, 7.0.5, 8.0.2, 9.0.1 and 9.1.4.
+In a composed constraint that carries `@Present(payload = Unwrapping.Skip.class)` as a meta-annotation the payload is ignored and an undefined property passes; give the payload where the composed annotation is used.
+
 ## Limitations
 
 * Doesn't work with `@JsonUnwrapped`.

@@ -5,6 +5,8 @@ module org.openapitools.jackson.nullable {
     requires static java.validation;
 
     exports org.openapitools.jackson.nullable;
+    exports org.openapitools.jackson.nullable.jakarta;
+    exports org.openapitools.jackson.nullable.javax;
 
     // These service providers for optional dependencies can be added, if baseline is 25+ or alternative implementations can be dropped
     // see https://github.com/OpenAPITools/jackson-databind-nullable/issues/100
