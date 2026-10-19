@@ -46,3 +46,4 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-jdk${{ matrix.java }}
       - name: Build and Test
         run: ./mvnw clean verify -P integration-test
+[![Test](https://github.com/OpenAPITools/jackson-databind-nullable/actions/workflows/maven_test.yml/badge.svg)](https://github.com/OpenAPITools/jackson-databind-nullable/actions/workflows/maven_test.yml)
