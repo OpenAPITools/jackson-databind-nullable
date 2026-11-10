@@ -24,6 +24,19 @@ public class JsonNullableJackson3BeanPropertyWriter extends BeanPropertyWriter {
         _allowSuppressNulls = allowSuppressNulls;
     }
 
+    /**
+     * Constructor variant kept for source and binary compatibility with subclasses
+     * written before {@code allowSuppressNulls} was introduced: it mirrors the
+     * protected two-argument constructor of Jackson's own {@link BeanPropertyWriter}
+     * and delegates to
+     * {@link #JsonNullableJackson3BeanPropertyWriter(BeanPropertyWriter, PropertyName, boolean)}
+     * with {@code allowSuppressNulls} defaulting to {@code false}, preserving the
+     * pre-existing serialization behavior.
+     */
+    protected JsonNullableJackson3BeanPropertyWriter(BeanPropertyWriter base, PropertyName newName) {
+        this(base, newName, false);
+    }
+
     protected JsonNullableJackson3BeanPropertyWriter(BeanPropertyWriter base, PropertyName newName,
                                                      boolean allowSuppressNulls) {
         super(base, newName);

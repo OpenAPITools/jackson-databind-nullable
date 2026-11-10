@@ -120,6 +120,10 @@ class JsonNullableSuppressNullsTest extends ModuleTestBase {
                 JsonNullable.of("foo"),
                 JsonNullable.<String>of(null),
                 JsonNullable.<String>undefined())));
+        assertEquals("[\"foo\",null,null]", jsonProcessor.writeValueAsString(new JsonNullable<?>[] {
+                JsonNullable.of("foo"),
+                JsonNullable.<String>of(null),
+                JsonNullable.<String>undefined()}));
         assertEquals("{\"values\":{\"key\":null}}",
                 jsonProcessor.writeValueAsString(new OptMapBean("key", JsonNullable.of(null))));
     }
@@ -209,6 +213,11 @@ class JsonNullableSuppressNullsTest extends ModuleTestBase {
                 JsonNullable.of("foo"),
                 JsonNullable.<String>of(null),
                 JsonNullable.<String>undefined())));
+        // array elements cannot be skipped; still written as null
+        assertEquals("[\"foo\",null,null]", jsonProcessor.writeValueAsString(new JsonNullable<?>[] {
+                JsonNullable.of("foo"),
+                JsonNullable.<String>of(null),
+                JsonNullable.<String>undefined()}));
         // map values cannot be skipped; still written as null
         assertEquals("{\"values\":{\"key\":null}}",
                 jsonProcessor.writeValueAsString(new OptMapBean("key", JsonNullable.of(null))));
