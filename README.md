@@ -61,7 +61,7 @@ XmlMapper xmlMapper = new XmlMapper();
 xmlMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 xmlMapper.registerModule(new JsonNullableModule());
 ```
-`setSerializationInclusion` changes only what the mapper writes, never what `readValue` returns, and `JsonNullable` properties ignore it: `undefined()` is always omitted and `of(null)` is always written as `null`. It drops plain `null` properties from the output. Through that it also changes `convertValue`, which writes and then reads: a `null` value that `NON_NULL` drops on the write reads back as `undefined()` instead of `of(null)` ([#55](https://github.com/OpenAPITools/jackson-databind-nullable/issues/55)).
+`setSerializationInclusion` changes only what the mapper writes, never what `readValue` returns, and `JsonNullable` bean properties ignore it: `undefined()` is always omitted, and by default `of(null)` is written as `null` (the [`allowSuppressNulls` option](#suppressing-null-values) omits it too). It drops plain `null` properties from the output. Through that it also changes `convertValue`, which writes and then reads: a `null` value that `NON_NULL` drops on the write reads back as `undefined()` instead of `of(null)` ([#55](https://github.com/OpenAPITools/jackson-databind-nullable/issues/55)).
 
 Then we can serialize
 ```java
@@ -96,12 +96,32 @@ A converter declared with `@JsonDeserialize(contentConverter = ...)` on a `JsonN
 A `DelegatingDeserializer` an application registers around a type's deserializer (directly, or via a `BeanDeserializerModifier`) is classified by the innermost deserializer it ultimately wraps, not by its own class, so a pass-through wrapper around Jackson's own deserializer keeps the shortcut above and one around an application deserializer keeps deferring to it.
 A deserializer that extends one of Jackson's own concrete deserializers (`EnumDeserializer`, `BeanDeserializer`, `NumberDeserializers.NumberDeserializer`, ...) keeps the shortcut above, since it inherits Jackson's own blank-string handling; one that implements deserialization on Jackson's abstract bases (`JsonDeserializer`, `StdDeserializer`, `StdScalarDeserializer`, ...) receives the token instead; and a wrapper that does not extend `DelegatingDeserializer` (or does not override `getDelegatee()`) is classified by its own class rather than by what it wraps, so a wrapper should extend `DelegatingDeserializer` to be seen through.
 
+### Suppressing null values
+
+By default `JsonNullable.of(null)` and `JsonNullable.ofNull()` serialize as an explicit JSON `null`,
+even when the mapper's inclusion is set to `NON_NULL` or `NON_ABSENT`; only `undefined()` is omitted,
+and only on bean properties.
+If shared request/response models should leave a property out of the response body entirely, enable
+`allowSuppressNulls` ([#51](https://github.com/OpenAPITools/jackson-databind-nullable/issues/51)):
+```java
+mapper.registerModule(new JsonNullableModule().allowSuppressNulls(true));
+// Jackson 3: JsonMapper mapper = JsonMapper.builder().addModule(new JsonNullableJackson3Module().allowSuppressNulls(true)).build();
+
+// given a bean with a JsonNullable<String> name property:
+assertEquals("{}", mapper.writeValueAsString(new Pet().name(JsonNullable.<String>of(null))));
+assertEquals("{\"name\":\"Rex\"}", mapper.writeValueAsString(new Pet().name(JsonNullable.of("Rex"))));
+```
+Suppression applies to bean properties only — the same places where `undefined()` was already omitted.
+Root values, array and collection elements and `Map` values cannot skip entries mid-stream and still serialize as `null`.
+A plain `null` reference of a `JsonNullable` property is suppressed too; non-`JsonNullable` properties are not affected.
+Deserialization is unchanged.
+
 `JsonNullable` can also be used as a `@JsonCreator` constructor parameter.
 An absent property is passed to the constructor as `JsonNullable.undefined()` rather than as `null`, so it stays distinguishable from an explicit `null`.
 
 `JsonNullable` also works as a record component on Jackson 2 and Jackson 3, the same way as for fields.
 A property missing from the JSON reaches the record as `JsonNullable.undefined()` and an explicit `null` as `JsonNullable.of(null)`.
-When writing, `undefined()` is left out and `of(null)` is written as `null`.
+When writing, `undefined()` is left out and, by default, `of(null)` is written as `null`; with `allowSuppressNulls`, it is omitted like on any other bean property.
 
 On the class path, the `ValueExtractor` is registered automatically via the Java Service loader mechanism (see [Limitations](#limitations) for the module path). The example class above will validate as follows
 ```java

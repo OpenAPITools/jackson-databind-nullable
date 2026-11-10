@@ -32,8 +32,15 @@ public class Jackson2Processor implements JsonProcessor {
 
     @Override
     public JsonProcessor mapperWithModule(boolean mapBlankStringToNull) {
+        return mapperWithModule(mapBlankStringToNull, false);
+    }
+
+    @Override
+    public JsonProcessor mapperWithModule(boolean mapBlankStringToNull, boolean allowSuppressNulls) {
         mapper = new ObjectMapper();
-        mapper.registerModule(new JsonNullableModule().mapBlankStringToNull(mapBlankStringToNull));
+        mapper.registerModule(new JsonNullableModule()
+                .mapBlankStringToNull(mapBlankStringToNull)
+                .allowSuppressNulls(allowSuppressNulls));
         return this;
     }
 

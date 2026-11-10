@@ -31,7 +31,14 @@ public class Jackson3Processor implements JsonProcessor {
 
     @Override
     public JsonProcessor mapperWithModule(boolean mapBlankStringToNull) {
-        builder = JsonMapper.builder().addModule(new JsonNullableJackson3Module().mapBlankStringToNull(mapBlankStringToNull));
+        return mapperWithModule(mapBlankStringToNull, false);
+    }
+
+    @Override
+    public JsonProcessor mapperWithModule(boolean mapBlankStringToNull, boolean allowSuppressNulls) {
+        builder = JsonMapper.builder().addModule(new JsonNullableJackson3Module()
+                .mapBlankStringToNull(mapBlankStringToNull)
+                .allowSuppressNulls(allowSuppressNulls));
         return this;
     }
 

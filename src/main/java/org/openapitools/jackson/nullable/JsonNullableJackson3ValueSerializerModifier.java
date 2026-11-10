@@ -10,6 +10,16 @@ import java.util.List;
 
 public class JsonNullableJackson3ValueSerializerModifier extends ValueSerializerModifier
 {
+    private final boolean allowSuppressNulls;
+
+    public JsonNullableJackson3ValueSerializerModifier() {
+        this(false);
+    }
+
+    public JsonNullableJackson3ValueSerializerModifier(boolean allowSuppressNulls) {
+        this.allowSuppressNulls = allowSuppressNulls;
+    }
+
     @Override
     public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
                                                      Supplier beanDesc,
@@ -19,7 +29,7 @@ public class JsonNullableJackson3ValueSerializerModifier extends ValueSerializer
             final BeanPropertyWriter writer = beanProperties.get(i);
             JavaType type = writer.getType();
             if (type.isTypeOrSubTypeOf(JsonNullable.class)) {
-                beanProperties.set(i, new JsonNullableJackson3BeanPropertyWriter(writer));
+                beanProperties.set(i, new JsonNullableJackson3BeanPropertyWriter(writer, allowSuppressNulls));
             }
         }
         return beanProperties;

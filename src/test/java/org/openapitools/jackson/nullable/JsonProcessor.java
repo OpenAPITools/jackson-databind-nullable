@@ -9,6 +9,8 @@ public interface JsonProcessor {
 
     JsonProcessor mapperWithModule(boolean mapBlankStringToNull);
 
+    JsonProcessor mapperWithModule(boolean mapBlankStringToNull, boolean allowSuppressNulls);
+
     JsonProcessor setDateFormat(SimpleDateFormat simpleDateFormat);
 
     JsonProcessor setDefaultPropertyInclusion(JsonInclude.Include incl);
